@@ -1,0 +1,140 @@
+﻿
+@{
+    ViewBag.Title = "Home";
+}
+
+<style>
+    .panel-body {
+        height: 500px;
+        overflow-y: auto;
+    }
+
+    .panel-footer {
+        background-color:white;
+        border:none;
+    }
+
+    .userDiv {
+        padding: 10px;
+        max-width: 600px;
+    }
+
+    .userChat {
+        padding: 10px;
+        min-width: 300px;
+        max-width: 500px;
+        display: block;
+        box-shadow: 0 2px 3px -2px gray;
+        border-radius: 15px;
+        padding-left: 10px;
+        background-color: whitesmoke;
+    }
+
+    .botDiv {
+        padding:10px;
+        padding-left:80px;
+        max-width:600px;
+    }
+    .botChat {
+        padding: 10px;
+        padding-left: 23px;
+        min-width: 300px;
+        max-width: 500px;
+        display: block;
+        box-shadow: 0 2px 3px -2px gray;
+        border-radius: 15px;
+        background-color: beige;
+    }
+
+    #message {
+        font-size:x-large;
+    }
+
+    .glyphicon-user {
+        padding-right: 10px;
+        margin-right: 10px;
+    }
+
+    .glyphicon-bullhorn {
+        padding-right: 10px;
+        margin-right: 10px;
+    }
+
+</style>
+
+
+
+<div style="padding:10px;">
+    <div class="row">
+        <div class="col-sm-8" style="border:1px solid whitesmoke">
+            <div class="panel-body" style="min-height:500px;padding-bottom:150px;">
+                <div id="chat-history"> </div>
+            </div>
+            <div class="panel-footer">
+                <div class="row">
+                    <div class="col-sm-8">
+                        <input id="message" class="form-control" type="text" style="min-width:300px;max-width:600px;height:80px;" />
+                    </div>
+                    <div class="col-sm-4">
+                        <button class="btn btn-danger" type="submit" id="saimaa" style="height:80px;width:80px;">
+                            <span class="glyphicon glyphicon-send" style="font-size:x-large"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-4">
+
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $(function () {
+        $("#saimaa").click(function () {
+            var message = "  " + $("#message").val();
+            var chathtml = $("#chat-history").html();
+            $(".panel-body").animate({
+                scrollTop: $('.panel-body')[0].scrollHeight - $('.panel-body').height()
+            }, 400);
+            chathtml = chathtml + '<div class="userDiv"><span class="userChat"><span class="glyphicon glyphicon-user"> </span>&nbsp<span>' + message + '</span></span></div>';
+            var data1 = { sender: "default", message: message };
+            $.ajax({
+                url: "/Home/Chat",
+                type: "POST",
+                data: JSON.stringify(data1),
+                dataType: "json",
+                contentType: "application/json",
+                success: function (data) {
+                    console.log("Response " + data);
+                    chathtml = chathtml + '<div class="botDiv" ><span class="botChat"><span class="glyphicon glyphicon-bullhorn"> </span>&nbsp<span>' + data + '</span></span></div>';
+                    //chathtml = chathtml + '<p style="float:right"><div >Bot says:</div><div>' + data + '</div></p>';
+                    $("#chat-history").html(chathtml);
+                    $("#message").val("");
+                },
+                error: function (xhr, textStatus, error) {
+
+                    console.log("Response " + error);
+                }
+            });
+        });
+
+
+        // Get the input field
+        var input = document.getElementById("message");
+
+        // Execute a function when the user releases a key on the keyboard
+        input.addEventListener("keyup", function (event) {
+            // Cancel the default action, if needed
+            event.preventDefault();
+            // Number 13 is the "Enter" key on the keyboard
+            if (event.keyCode === 13) {
+                // Trigger the button element with a click
+                document.getElementById("saimaa").click();
+            }
+        });
+
+    });
+
+</script>
