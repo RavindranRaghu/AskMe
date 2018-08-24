@@ -21,6 +21,8 @@ namespace ChaT.db
         [StringLength(1000)]
         public string IntentDescription { get; set; }
 
+        public int ParentId { get; set; }
+
         [Key]
         [Column(Order = 2, TypeName = "datetime2")]
         public DateTime UpdatedDate { get; set; }

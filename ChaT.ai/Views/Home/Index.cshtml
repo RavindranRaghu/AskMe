@@ -1,4 +1,5 @@
-﻿
+﻿@model IEnumerable<ChaT.db.ChatIntent>
+
 @{
     ViewBag.Title = "Home";
 }
@@ -10,8 +11,8 @@
     }
 
     .panel-footer {
-        background-color:white;
-        border:none;
+        background-color: white;
+        border: none;
     }
 
     .userDiv {
@@ -31,10 +32,11 @@
     }
 
     .botDiv {
-        padding:10px;
-        padding-left:80px;
-        max-width:600px;
+        padding: 10px;
+        padding-left: 80px;
+        max-width: 600px;
     }
+
     .botChat {
         padding: 10px;
         padding-left: 23px;
@@ -47,7 +49,7 @@
     }
 
     #message {
-        font-size:x-large;
+        font-size: x-large;
     }
 
     .glyphicon-user {
@@ -58,6 +60,20 @@
     .glyphicon-bullhorn {
         padding-right: 10px;
         margin-right: 10px;
+    }
+
+    .tags {
+        width: 123px;
+        text-align: center;
+        color: whitesmoke;
+        border-radius: 10px;
+        font-size: x-large;
+    }
+
+    .tag-header {
+        font-size: x-large;
+        color:crimson;
+        padding-top:30px;
     }
 
 </style>
@@ -74,6 +90,7 @@
                 <div class="row">
                     <div class="col-sm-8">
                         <input id="message" class="form-control" type="text" style="min-width:300px;max-width:600px;height:80px;" />
+                        <input id="node-level" type="hidden" value="@ViewBag.nodeLevel" />
                     </div>
                     <div class="col-sm-4">
                         <button class="btn btn-danger" type="submit" id="saimaa" style="height:80px;width:80px;">
@@ -84,7 +101,17 @@
             </div>
         </div>
         <div class="col-sm-4">
-
+            <div style="padding:23px;">
+                <div class="tag-header">Help:</div>
+                @foreach (var item in Model)
+                {
+                    <div style="padding-top: 10px;">
+                        <div class="tags" data-message="@item.IntentName">
+                            <a href="#">@item.IntentName</a>                            
+                        </div>
+                    </div>  
+                }
+            </div>
         </div>
     </div>
 </div>
@@ -92,32 +119,31 @@
 
 <script>
     $(function () {
+
+        responsiveVoice.speak("Welcome to Chat Bot");
+
         $("#saimaa").click(function () {
             var message = "  " + $("#message").val();
             var chathtml = $("#chat-history").html();
+            var node = $("#node-level").val();
             $(".panel-body").animate({
                 scrollTop: $('.panel-body')[0].scrollHeight - $('.panel-body').height()
             }, 400);
             chathtml = chathtml + '<div class="userDiv"><span class="userChat"><span class="glyphicon glyphicon-user"> </span>&nbsp<span>' + message + '</span></span></div>';
-            var data1 = { sender: "default", message: message };
-            $.ajax({
-                url: "/Home/Chat",
-                type: "POST",
-                data: JSON.stringify(data1),
-                dataType: "json",
-                contentType: "application/json",
-                success: function (data) {
-                    console.log("Response " + data);
-                    chathtml = chathtml + '<div class="botDiv" ><span class="botChat"><span class="glyphicon glyphicon-bullhorn"> </span>&nbsp<span>' + data + '</span></span></div>';
-                    //chathtml = chathtml + '<p style="float:right"><div >Bot says:</div><div>' + data + '</div></p>';
-                    $("#chat-history").html(chathtml);
-                    $("#message").val("");
-                },
-                error: function (xhr, textStatus, error) {
+            var data1 = { sender: "default", message: message, node: node };
+            getChatResponse(data1, chathtml);
+        });
 
-                    console.log("Response " + error);
-                }
-            });
+        $(".tags").click(function () {
+            var message = $(this).data("message");
+            var chathtml = $("#chat-history").html();
+            var node = $("#node-level").val();
+            $(".panel-body").animate({
+                scrollTop: $('.panel-body')[0].scrollHeight - $('.panel-body').height()
+            }, 400);
+            chathtml = chathtml + '<div class="userDiv"><span class="userChat"><span class="glyphicon glyphicon-user"> </span>&nbsp<span>' + message + '</span></span></div>';
+            var data1 = { sender: "default", message: message, node: node };
+            getChatResponse(data1, chathtml);
         });
 
 
@@ -134,6 +160,28 @@
                 document.getElementById("saimaa").click();
             }
         });
+
+        function getChatResponse(data1, chathtml) {
+            $.ajax({
+                url: "/Home/Chat",
+                type: "POST",
+                data: JSON.stringify(data1),
+                dataType: "json",
+                contentType: "application/json",
+                success: function (data) {
+                    console.log("Response " + data);
+                    responsiveVoice.speak(data);
+                    chathtml = chathtml + '<div class="botDiv" ><span class="botChat"><span class="glyphicon glyphicon-bullhorn"> </span>&nbsp<span>' + data + '</span></span></div>';
+                    //chathtml = chathtml + '<p style="float:right"><div >Bot says:</div><div>' + data + '</div></p>';
+                    $("#chat-history").html(chathtml);
+                    $("#message").val("");
+                },
+                error: function (xhr, textStatus, error) {
+
+                    console.log("Response " + error);
+                }
+            });
+        }
 
     });
 

@@ -10,10 +10,12 @@ namespace ChaT.ai.bLogic
     public class AskMeChannel
     {
         private string Message = string.Empty;
+        private int Node = 0;
         private ChatDatabaseModel db;
-        public AskMeChannel(string message)
+        public AskMeChannel(string message, int node)
         {
             this.Message = message.ToLower();
+            this.Node = node;
             db = new ChatDatabaseModel();
         }
 
@@ -21,6 +23,7 @@ namespace ChaT.ai.bLogic
         {
             string responseMessage = "Sorry, I did not understand";
             string intentMessage = "NoIntentMatched";
+            string entity = string.Empty;
             TFIDF getVocab = new TFIDF();
 
             if (Message.Contains("hello") || Message.Contains("good morning") || Message.Contains("how are you"))
@@ -37,32 +40,49 @@ namespace ChaT.ai.bLogic
                                            where intention.ChatIntentId > 2
                                            select intention).ToList();
 
-            List<string> intentNameList = intentList.Select(x => x.IntentName).ToList();
 
             foreach (string vocab in vocabList)
             {
-                var hasIntent = intentList.Where(x => vocab.Contains(x.IntentName) || x.IntentName.Contains(vocab));
+                var hasIntent = intentList.Where(x=>x.ParentId == Node).Where(x => vocab.Contains(x.IntentName) || x.IntentName.Contains(vocab));
                 if (hasIntent.Any())
                 {
-                    List<string> withIntentList = hasIntent.Select(x => x.IntentName).ToList();
-                    foreach (string intent in withIntentList)
+                    Dictionary<int, string> intentDict = hasIntent.Select(t => new { t.ChatIntentId, t.IntentName}).ToList().ToDictionary(x => x.ChatIntentId, y => y.IntentName);
+                    foreach (KeyValuePair<int, string> intent in intentDict)
                     {
-                        responseMessage = intent + " has been processed";
-                        intentMessage = intent;
+                        entity = GetEntityforIntent(intent.Key, vocabList);
+                        if (string.IsNullOrEmpty(entity))
+                        {
+                            responseMessage = intent.Value + " has been processed";
+                        }
+                        else
+                        {
+                            responseMessage = intent.Value + " has been processed on " + entity;
+                        }
+                        
+                        intentMessage = intent.Value;
                         return new KeyValuePair<string, string>(intentMessage, responseMessage);
                     }
                 }
             }
 
+            Dictionary<int, string> intentNameDict = intentList.Select(t => new { t.ChatIntentId, t.IntentName }).ToList().ToDictionary(x => x.ChatIntentId, y => y.IntentName);
             LevenshteinDistance dist = new LevenshteinDistance();
             foreach (string vocab in vocabList)
             {
-                foreach (string intent in intentNameList)
+                foreach (KeyValuePair< int, string> intent in intentNameDict)
                 {
-                    if (dist.Compute(vocab, intent) < 4)
+                    if (dist.Compute(vocab, intent.Value) < 4)
                     {
-                        responseMessage = intent + " has been processed";
-                        intentMessage = intent;
+                        entity = GetEntityforIntent(intent.Key, vocabList);
+                        if (string.IsNullOrEmpty(entity))
+                        {
+                            responseMessage = intent.Value + " has been processed";
+                        }
+                        else
+                        {
+                            responseMessage = intent.Value + " has been processed on " + entity;
+                        }
+                        intentMessage = intent.Value;
                         return new KeyValuePair<string, string>(intentMessage, responseMessage);
                     }
                 }
@@ -86,12 +106,56 @@ namespace ChaT.ai.bLogic
             if (compareHigh > 0)
             {
                 string intent = db.ChatIntent.Where(x => x.ChatIntentId == questionHighestMatch.Value).Select(y => y.IntentName).FirstOrDefault();
-                responseMessage = intent + " has been processed";
+                entity = GetEntityforIntent(questionHighestMatch.Value, vocabList);
+                if (string.IsNullOrEmpty(entity))
+                {
+                    responseMessage = intent + " has been processed";
+                }
+                else
+                {
+                    responseMessage = intent + " has been processed on " + entity;
+                }
                 intentMessage = intent;
                 return new KeyValuePair<string, string>(intentMessage, responseMessage);
             }
 
             return new KeyValuePair<string, string>(intentMessage, responseMessage);
+        }
+
+        private string GetEntityforIntent(int chatIntentId, List<string> vocabList)
+        {
+            string entity = string.Empty;
+            List<ChatEntity> entityList = db.ChatEntity.Where(z => z.ChatIntentId == chatIntentId.ToString()).ToList();
+
+            foreach (string vocab in vocabList)
+            {
+                var hasEntity = entityList.Where(x => vocab.Contains(x.EntityName) || x.EntityName.Contains(vocab));
+                if (hasEntity.Any())
+                {
+                    List<string> withEntityList = hasEntity.Select(x => x.EntityName).ToList();
+                    foreach (string entityName in withEntityList)
+                    {
+                        entity = entityName;
+                        return entity;
+                    }
+                }
+            }
+
+            List<string> entityNames = entityList.Select(x => x.EntityName).ToList();
+            LevenshteinDistance dist = new LevenshteinDistance();
+            foreach (string vocab in vocabList)
+            {
+                foreach (string entityName in entityNames)
+                {
+                    if (dist.Compute(vocab, entityName) < 4)
+                    {
+                        entity = entityName;
+                        return entity;
+                    }
+                }
+            }
+
+            return entity;
         }
     }
 }

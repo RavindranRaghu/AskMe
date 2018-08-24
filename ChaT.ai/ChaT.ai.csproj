@@ -52,6 +52,9 @@
       <HintPath>..\packages\EntityFramework.6.2.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="SpeechClient, Version=0.0.0.0, Culture=neutral, PublicKeyToken=720c26922c782415, processorArchitecture=AMD64">
+      <HintPath>..\packages\Microsoft.ProjectOxford.SpeechRecognition-x64.1.0.0.7\lib\SpeechClient.dll</HintPath>
+    </Reference>
     <Reference Include="System.Web.DynamicData" />
     <Reference Include="System.Web.Entity" />
     <Reference Include="System.Web.ApplicationServices" />
@@ -98,22 +101,30 @@
   <ItemGroup>
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
+    <Content Include="Content\img\loader.gif" />
     <Content Include="Content\img\logo.png" />
+    <Content Include="Content\img\mic128.png" />
     <Content Include="Content\Site.css" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
+    <Content Include="Scripts\audio-display.js" />
+    <Content Include="Scripts\audio-main.js" />
+    <Content Include="Scripts\audio-recorder.js" />
+    <Content Include="Scripts\audio-recordworker.js" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />
     <Content Include="Scripts\modernizr-2.6.2.js" />
+    <Content Include="Scripts\responder.js" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="bLogic\AskMeChannel.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Dto\AudioContent.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -130,6 +141,7 @@
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Scripts\jquery-1.10.2.min.map" />
     <Content Include="Views\Home\Intent.cshtml" />
+    <Content Include="Views\Home\Voice.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

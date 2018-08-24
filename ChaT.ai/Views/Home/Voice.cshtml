@@ -1,0 +1,37 @@
+﻿
+@{
+    ViewBag.Title = "Voice";
+}
+<script src="~/Scripts/audio-display.js"></script>
+<script src="~/Scripts/audio-recorder.js"></script>
+<script src="~/Scripts/audio-recordworker.js"></script>
+<script src="~/Scripts/audio-main.js"></script>
+
+<div id="controls">
+    <img id="record" src="~/Content/img/mic128.png" onclick="toggleRecording(this);">
+    <img id="loader" src="~/Content/img/loader.gif"/>
+    <span id="isaudio"></span>
+    <a id="save" href="#">save</a>
+</div>
+<div id="viz">
+    <canvas id="analyser" width="1024" height="500"></canvas>
+    <canvas id="wavedisplay" width="1024" height="500"></canvas>
+</div>
+
+<script>
+    $(function () {
+        $("#loader").hide();
+        $("#record").click(function () {
+            if ($("#isaudio").text() == "recording") {
+                $("#isaudio").text("");
+                $("#loader").hide();
+            }
+            else {
+                $('#isaudio').text("recording");
+                $("#loader").show();
+            }
+        })
+    });
+
+</script>
+
