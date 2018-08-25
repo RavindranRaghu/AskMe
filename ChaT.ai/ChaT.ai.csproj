@@ -123,6 +123,8 @@
   <ItemGroup>
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="bLogic\AskMeChannel.cs" />
+    <Compile Include="bLogic\AskMeContentManager.cs" />
+    <Compile Include="bLogic\AskMeHiBye.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Dto\AudioContent.cs" />
     <Compile Include="Global.asax.cs">

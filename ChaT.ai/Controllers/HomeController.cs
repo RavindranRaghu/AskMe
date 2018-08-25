@@ -32,9 +32,10 @@ namespace ChaT.ai.Controllers
         public ActionResult Chat(string sender, string message, int node)
         {
             AskMeChannel channel = new AskMeChannel(message, node);
-            KeyValuePair<string, string> responseMessage = channel.ChatResponse();
+            KeyValuePair<int, string> responseMessage = channel.ChatInitializer();
+            var result = new { node = responseMessage.Key, response = responseMessage.Value };
             //ViewBag.Intent = responseMessage.Key;
-            return Json(responseMessage.Value, JsonRequestBehavior.AllowGet);
+            return Json(result, JsonRequestBehavior.AllowGet);
         }
 
         public ActionResult Intent()

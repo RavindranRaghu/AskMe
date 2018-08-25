@@ -19,9 +19,14 @@ namespace ChaT.db
         public string IntentName { get; set; }
 
         [StringLength(1000)]
+        [Display(Name ="Alias Name")]
         public string IntentDescription { get; set; }
 
         public int ParentId { get; set; }
+
+        [StringLength(2300)]
+        [Display(Name = "ChaT Bot Response")]
+        public string Response { get; set; }
 
         [Key]
         [Column(Order = 2, TypeName = "datetime2")]

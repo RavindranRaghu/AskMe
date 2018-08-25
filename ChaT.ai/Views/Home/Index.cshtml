@@ -102,7 +102,7 @@
         </div>
         <div class="col-sm-4">
             <div style="padding:23px;">
-                <div class="tag-header">Help:</div>
+                <div class="tag-header">Suggestions:</div>
                 @foreach (var item in Model)
                 {
                     <div style="padding-top: 10px;">
@@ -169,11 +169,13 @@
                 dataType: "json",
                 contentType: "application/json",
                 success: function (data) {
-                    console.log("Response " + data);
-                    responsiveVoice.speak(data);
-                    chathtml = chathtml + '<div class="botDiv" ><span class="botChat"><span class="glyphicon glyphicon-bullhorn"> </span>&nbsp<span>' + data + '</span></span></div>';
+                    //var arr = $.parseJSON(data);
+                    console.log("Response " + data.node);
+                    responsiveVoice.speak(data.response);
+                    chathtml = chathtml + '<div class="botDiv" ><span class="botChat"><span class="glyphicon glyphicon-bullhorn"> </span>&nbsp<span>' + data.response + '</span></span></div>';
                     //chathtml = chathtml + '<p style="float:right"><div >Bot says:</div><div>' + data + '</div></p>';
                     $("#chat-history").html(chathtml);
+                    $("#node-level").val(data.node);
                     $("#message").val("");
                 },
                 error: function (xhr, textStatus, error) {
