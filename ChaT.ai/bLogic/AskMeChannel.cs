@@ -256,14 +256,14 @@ namespace ChaT.ai.bLogic
         private KeyValuePair<int, string> GetChildIntent(int chatIntentId, List<string> vocabList)
         {
             string entity = string.Empty;
-            List<ChatIntent> intentList = db.ChatIntent.Where(z => z.ChatIntentId == chatIntentId).ToList();
+            List<ChatIntent> intentList = db.ChatIntent.Where(z => z.ParentId == chatIntentId).ToList();
 
             foreach (string vocab in vocabList)
             {
                 var hasIntent = intentList.Where(x => vocab.Contains(x.IntentName) || x.IntentName.Contains(vocab));
                 if (hasIntent.Any())
                 {
-                    Dictionary<int, string> intentNameDict = intentList.Select(t => new { t.ChatIntentId, t.Response }).ToList().ToDictionary(x => x.ChatIntentId, y => y.Response);
+                    Dictionary<int, string> intentNameDict = hasIntent.Select(t => new { t.ChatIntentId, t.Response }).ToList().ToDictionary(x => x.ChatIntentId, y => y.Response);
                     foreach (KeyValuePair<int, string> intentName in intentNameDict)
                     {
                         return intentName;

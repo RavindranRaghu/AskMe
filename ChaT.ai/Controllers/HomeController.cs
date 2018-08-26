@@ -33,8 +33,18 @@ namespace ChaT.ai.Controllers
         {
             AskMeChannel channel = new AskMeChannel(message, node);
             KeyValuePair<int, string> responseMessage = channel.ChatInitializer();
-            var result = new { node = responseMessage.Key, response = responseMessage.Value };
-            //ViewBag.Intent = responseMessage.Key;
+            node = responseMessage.Key;
+            List<string> suggest = new List<string>();
+            var hasSuggest = db.ChatIntent.Where(x => x.ParentId == node && x.ChatIntentId > 2).Select(y => y.IntentName);
+            if (hasSuggest.Any())
+            {
+                suggest = hasSuggest.ToList();
+            }
+            else
+            {
+                suggest = db.ChatIntent.Where(x => x.ParentId == 0 && x.ChatIntentId > 2 ).Select(y => y.IntentName).ToList();
+            }
+            var result = new { node = node, response = responseMessage.Value, suggest = suggest };
             return Json(result, JsonRequestBehavior.AllowGet);
         }
 

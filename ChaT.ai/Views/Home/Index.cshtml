@@ -64,8 +64,8 @@
 
     .tags {
         width: 123px;
-        text-align: center;
-        color: whitesmoke;
+        text-align: left;
+        color: crimson;
         border-radius: 10px;
         font-size: x-large;
     }
@@ -73,7 +73,9 @@
     .tag-header {
         font-size: x-large;
         color:crimson;
-        padding-top:30px;
+        padding-top: 30px;
+        font-weight:bold;
+        padding-bottom:10px;
     }
 
 </style>
@@ -103,14 +105,12 @@
         <div class="col-sm-4">
             <div style="padding:23px;">
                 <div class="tag-header">Suggestions:</div>
-                @foreach (var item in Model)
-                {
-                    <div style="padding-top: 10px;">
-                        <div class="tags" data-message="@item.IntentName">
-                            <a href="#">@item.IntentName</a>                            
-                        </div>
-                    </div>  
-                }
+                <div id="suggest-list">
+                    @foreach (var item in Model)
+                    {
+                        <div style="padding-top: 10px;"><div class="tags" data-message="@item.IntentName">@item.IntentName</div></div>
+                    }
+                </div>
             </div>
         </div>
     </div>
@@ -177,6 +177,16 @@
                     $("#chat-history").html(chathtml);
                     $("#node-level").val(data.node);
                     $("#message").val("");
+                    var suggestions = data.suggest;
+                    var suggestHtml = "";
+                    suggestions.forEach(function (element) {
+                        suggestHtml = suggestHtml + '<div style="padding-top: 10px;"><div class="tags" data-message="' + element + '">' + element + '</div></div>';
+                    });
+                    $("#suggest-list").html('<div style="padding-left:23px;"><img src="../Content/img/loader.gif" /><div>');
+                    setTimeout(function () {
+                        $("#suggest-list").html(suggestHtml);
+                        $("#suggest-list").show('fadeIn', {}, 500)
+                    }, 500);
                 },
                 error: function (xhr, textStatus, error) {
 
