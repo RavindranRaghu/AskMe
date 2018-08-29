@@ -72,15 +72,12 @@
 
     .tag-header {
         font-size: x-large;
-        color:crimson;
+        color: crimson;
         padding-top: 30px;
-        font-weight:bold;
-        padding-bottom:10px;
+        font-weight: bold;
+        padding-bottom: 10px;
     }
-
 </style>
-
-
 
 <div style="padding:10px;">
     <div class="row">
@@ -90,14 +87,26 @@
             </div>
             <div class="panel-footer">
                 <div class="row">
-                    <div class="col-sm-8">
+                    <div class="col-sm-7">
                         <input id="message" class="form-control" type="text" style="min-width:300px;max-width:600px;height:80px;" />
                         <input id="node-level" type="hidden" value="@ViewBag.nodeLevel" />
                     </div>
-                    <div class="col-sm-4">
+                    <div class="col-sm-2">
                         <button class="btn btn-danger" type="submit" id="saimaa" style="height:80px;width:80px;">
                             <span class="glyphicon glyphicon-send" style="font-size:x-large"></span>
                         </button>
+                    </div>
+                    <div class="col-sm-3">
+                        <div id="controls">
+                            <img id="record" src="~/Content/img/mic128.png" onclick="toggleRecording(this);">
+                            <img id="loader" src="~/Content/img/loader.gif" />
+                            <span id="isaudio" style="display:none"></span>
+                            <a id="save" href="#" style="display:none">save</a>
+                        </div>
+                        <div id="viz" style="display:none">
+                            <canvas id="analyser" width="1024" height="500"></canvas>
+                            <canvas id="wavedisplay" width="1024" height="500"></canvas>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -161,40 +170,57 @@
             }
         });
 
-        function getChatResponse(data1, chathtml) {
-            $.ajax({
-                url: "/Home/Chat",
-                type: "POST",
-                data: JSON.stringify(data1),
-                dataType: "json",
-                contentType: "application/json",
-                success: function (data) {
-                    //var arr = $.parseJSON(data);
-                    console.log("Response " + data.node);
-                    responsiveVoice.speak(data.response);
-                    chathtml = chathtml + '<div class="botDiv" ><span class="botChat"><span class="glyphicon glyphicon-bullhorn"> </span>&nbsp<span>' + data.response + '</span></span></div>';
-                    //chathtml = chathtml + '<p style="float:right"><div >Bot says:</div><div>' + data + '</div></p>';
-                    $("#chat-history").html(chathtml);
-                    $("#node-level").val(data.node);
-                    $("#message").val("");
-                    var suggestions = data.suggest;
-                    var suggestHtml = "";
-                    suggestions.forEach(function (element) {
-                        suggestHtml = suggestHtml + '<div style="padding-top: 10px;"><div class="tags" data-message="' + element + '">' + element + '</div></div>';
-                    });
-                    $("#suggest-list").html('<div style="padding-left:23px;"><img src="../Content/img/loader.gif" /><div>');
-                    setTimeout(function () {
-                        $("#suggest-list").html(suggestHtml);
-                        $("#suggest-list").show('fadeIn', {}, 500)
-                    }, 500);
-                },
-                error: function (xhr, textStatus, error) {
-
-                    console.log("Response " + error);
-                }
-            });
-        }
+        $("#loader").hide();
+        $("#record").click(function () {
+            if ($("#isaudio").text() == "recording") {
+                $("#isaudio").text("");
+                $("#loader").hide();
+            }
+            else {
+                $('#isaudio').text("recording");
+                $("#loader").show();
+            }
+        })
 
     });
 
+
+    function getChatResponse(data1, chathtml) {
+        $.ajax({
+            url: "/Home/Chat",
+            type: "POST",
+            data: JSON.stringify(data1),
+            dataType: "json",
+            contentType: "application/json",
+            success: function (data) {
+                //var arr = $.parseJSON(data);
+                console.log("Response " + data.node);
+                responsiveVoice.speak(data.response);
+                chathtml = chathtml + '<div class="botDiv" ><span class="botChat"><span class="glyphicon glyphicon-bullhorn"> </span>&nbsp<span>' + data.response + '</span></span></div>';
+                //chathtml = chathtml + '<p style="float:right"><div >Bot says:</div><div>' + data + '</div></p>';
+                $("#chat-history").html(chathtml);
+                $("#node-level").val(data.node);
+                $("#message").val("");
+                var suggestions = data.suggest;
+                var suggestHtml = "";
+                suggestions.forEach(function (element) {
+                    suggestHtml = suggestHtml + '<div style="padding-top: 10px;"><div class="tags" data-message="' + element + '">' + element + '</div></div>';
+                });
+                $("#suggest-list").html('<div style="padding-left:23px;"><img src="../Content/img/loader.gif" /><div>');
+                setTimeout(function () {
+                    $("#suggest-list").html(suggestHtml);
+                    $("#suggest-list").show('fadeIn', {}, 500)
+                }, 500);
+            },
+            error: function (xhr, textStatus, error) {
+
+                console.log("Response " + error);
+            }
+        });
+    } 
+
 </script>
+<script src="~/Scripts/audio-display.js"></script>
+<script src="~/Scripts/audio-recorder.js"></script>
+<script src="~/Scripts/audio-recordworker.js"></script>
+<script src="~/Scripts/audio-main.js"></script>

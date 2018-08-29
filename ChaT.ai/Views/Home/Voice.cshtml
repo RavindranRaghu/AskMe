@@ -7,13 +7,13 @@
 <script src="~/Scripts/audio-recordworker.js"></script>
 <script src="~/Scripts/audio-main.js"></script>
 
-<div id="controls">
+<div id="controls" style="padding-top:23px;">
     <img id="record" src="~/Content/img/mic128.png" onclick="toggleRecording(this);">
     <img id="loader" src="~/Content/img/loader.gif"/>
     <span id="isaudio"></span>
     <a id="save" href="#">save</a>
 </div>
-<div id="viz">
+<div id="viz" style="display:none">
     <canvas id="analyser" width="1024" height="500"></canvas>
     <canvas id="wavedisplay" width="1024" height="500"></canvas>
 </div>

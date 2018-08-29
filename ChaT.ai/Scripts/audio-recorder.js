@@ -111,7 +111,32 @@ DEALINGS IN THE SOFTWARE.
         var link = document.getElementById("save");
         link.href = url;
         link.download = filename || 'output.wav';
-        readBlob(blob);
+        var formData = new FormData();
+        formData.append("FileUpload", blob);
+        //readBlob(blob);
+        $.ajax({
+            type: "POST",
+            url: '/Home/UploadAudio',
+            data: formData,
+            dataType: 'json',
+            contentType: false,
+            processData: false,
+            success: function (message) {
+                var node = $("#node-level").val();
+                var vchathtml = $("#chat-history").html();
+                message = message.replace(".", "");
+                message = message.toLowerCase();
+                $(".panel-body").animate({
+                    scrollTop: $('.panel-body')[0].scrollHeight - $('.panel-body').height()
+                }, 400);
+                vchathtml = vchathtml + '<div class="userDiv"><span class="userChat"><span class="glyphicon glyphicon-user"> </span>&nbsp<span>' + message + '</span></span></div>';
+                var data2 = { sender: "default", message: message, node: node };
+                getChatResponse(data2, vchathtml);
+            },
+            error: function (error) {
+                alert("errror");
+            }
+        });
 
     }
 

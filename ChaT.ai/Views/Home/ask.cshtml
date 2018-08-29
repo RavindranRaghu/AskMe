@@ -1,0 +1,225 @@
+﻿@model IEnumerable<ChaT.ai.Dto.AskDto>
+
+@{
+    ViewBag.Title = "ChatQuestion";
+}
+
+<style>
+
+    table.dataTable thead .sorting_asc {
+        background: url("../Content/img/sort_asc.png") no-repeat center right;
+    }
+    table.dataTable thead .sorting {
+        background: url("../Content/img/sort_both.png") no-repeat center right;
+    }
+
+    table.dataTable thead .sorting_desc {
+        background: url("../Content/img/sort_desc.png") no-repeat center right;
+    }
+</style>
+<link rel="stylesheet" type="text/css" href="~/Content/jquery.dataTables.min.css" />
+<script type="text/javascript" src="~/Scripts/jquery.dataTables.min.js"></script>
+
+<p style="padding-top:23px;">
+    <span class="appHeading">Questions</span>
+    <button type="button" class="btnEdit btn btn-link newProject"
+            data-toggle="modal" data-target="#projectModal">Create</button>
+</p>
+<table class="table" id="questionTable">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.QuestionId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.QuestionDesc)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ChatIntentName)
+            </th>
+            <th>Edit</th>
+            <th>Delete</th>
+        </tr>
+    </thead>
+    @foreach (var item in Model)
+    {
+        <tbody>
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.QuestionId)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.QuestionDesc)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ChatIntentName)
+                </td>
+                <td>
+                    <button type="button" class="btnEdit glyphicon glyphicon-edit openExistingProject"
+                            data-toggle="modal" data-id=@item.QuestionId data-name="@item.QuestionDesc" data-intentid="@item.ChatIntentId" data-intentname="@item.ChatIntentName" data-lastupdated="@item.UpdatedDate" data-target="#projectModal"></button>
+                </td>
+                <td>
+                    <button type="button" class="btnEdit glyphicon glyphicon-trash deleteExistingProject"
+                            data-toggle="modal" data-id=@item.QuestionId data-name="@item.QuestionDesc" data-intentid="@item.ChatIntentId" data-intentname="@item.ChatIntentName" data-lastupdated="@item.UpdatedDate" data-target="#projectModal"></button>
+                </td>
+            </tr>
+        </tbody>
+    }
+
+</table>
+
+
+<div id="projectModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="appHeading">Question</h4>
+                <div><span style="color:dodgerblue" id="lastUpdated"></span></div>
+            </div>
+
+            <div class="modal-body">
+                <input type="hidden" id="questionId" />
+                <input type="hidden" id="intentId" />
+                <input type="hidden" id="operation" />
+
+                <div class="row">
+                    <div class="col-sm-2">Question</div>
+                    <div class="col-sm-10"><input type="text" class="form-control" id="questionDesc" /></div>
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-2">Intent</div>
+                    <div class="col-sm-10"><input type="text" class="form-control" id="intentName" /></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="saveProject" type="button" class="btn btn-default">Save</button>
+                <button id="closeProject" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+
+    $(function () {
+
+        $(document).ready(function () {
+            $('#questionTable').DataTable({
+                "pageLength": 50
+            });
+        });
+
+
+
+        //open Modal for existing project
+
+        $(document).on('click', '.openExistingProject', function () {
+            $('#saveProject').html('Update');
+            $('#questionId').val($(this).data('id'));
+            $('#intendId').val($(this).data('intendid'));
+            $('#intentName').val($(this).data('intentname'));
+            $('#questionDesc').val($(this).data('name'));
+            $('#lastUpdated').html('Last Updated: ' + $(this).data('lastupdated'));
+            $('#operation').val("u");
+        });
+
+        //open Modal for delete
+
+        $(document).on('click', '.deleteExistingProject', function () {
+            $('#saveProject').html('Delete');
+            $('#questionId').val($(this).data('id'));
+            $('#intendId').val($(this).data('intendid'));
+            $('#intentName').val($(this).data('intentname'));
+            $('#questionDesc').val($(this).data('name'));
+            $('#lastUpdated').html('Last Updated: ' + $(this).data('lastupdated'));
+            $('#operation').val("d");
+        });
+
+
+        //open Modal for new project
+
+        $(document).on('click', '.newProject', function () {
+            $('#saveProject').html('Add');
+            $('#questionId').val(0);
+            $('#lastUpdated').html('Adding New Project');
+            $('#operation').val("a");
+        });
+
+
+
+        // save project
+
+        $(document).on('click', '#saveProject', function () {
+            var questionId = $('#questionId').val();
+            var questionDesc = $('#questionDesc').val();
+            var intendId = $('#intendId').val();
+            var intendName = $('#intendName').val();
+            var operation = $('#operation').val();
+            var updatedDate = new Date;
+
+            var project = { QuestionId: questionId, QuestionDesc: questionDesc, intendId: intendId, intendName: intendName, UpdatedDate: updatedDate };
+
+            var finalProject = { project: project, operation: operation };
+
+            $.ajax({
+
+                type: "POST",
+
+                url: "/home/ProjectUpdate/",
+
+                data: JSON.stringify(finalProject),
+
+                contentType: "application/json; charset=utf-8",
+
+                dataType: "json",
+
+                success: function (result) {
+
+                    if (result == true) {
+
+                        $('#lastUpdated').html('Updated Successfully <span style="color:green" class="glyphicon glyphicon-ok-circle"> </span>');
+
+                    }
+
+                    else {
+
+                        $('#lastUpdated').html('Updated Failed <span style="color:red" class="glyphicon glyphicon-remove-circle"> </span>');
+
+                    }
+
+                },
+
+                error: function (errorMsg) {
+
+                    $('#lastUpdated').html('<span class="alert alert-warning">' + errorMsg.statusText + '</span> ');
+
+                }
+
+
+
+            });
+
+        });
+
+
+
+        //Close Modal
+
+        $(document).on('click', '#closeProject', function () {
+
+            location.reload();
+
+        });
+
+
+
+    });
+
+
+
+</script>

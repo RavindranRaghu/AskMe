@@ -52,6 +52,9 @@
       <HintPath>..\packages\EntityFramework.6.2.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="SpeechClient, Version=0.0.0.0, Culture=neutral, PublicKeyToken=720c26922c782415, processorArchitecture=AMD64">
       <HintPath>..\packages\Microsoft.ProjectOxford.SpeechRecognition-x64.1.0.0.7\lib\SpeechClient.dll</HintPath>
     </Reference>
@@ -104,7 +107,11 @@
     <Content Include="Content\img\loader.gif" />
     <Content Include="Content\img\logo.png" />
     <Content Include="Content\img\mic128.png" />
+    <Content Include="Content\img\sort_asc.png" />
+    <Content Include="Content\img\sort_both.png" />
+    <Content Include="Content\img\sort_desc.png" />
     <Content Include="Content\Site.css" />
+    <Content Include="Content\sound\myRecording01.wav" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
     <Content Include="Scripts\audio-display.js" />
@@ -116,6 +123,8 @@
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />
+    <Content Include="Content\jquery.dataTables.min.css" />
+    <Content Include="Scripts\jquery.dataTables.min.js" />
     <Content Include="Scripts\modernizr-2.6.2.js" />
     <Content Include="Scripts\responder.js" />
     <Content Include="Web.config" />
@@ -125,8 +134,12 @@
     <Compile Include="bLogic\AskMeChannel.cs" />
     <Compile Include="bLogic\AskMeContentManager.cs" />
     <Compile Include="bLogic\AskMeHiBye.cs" />
+    <Compile Include="bLogic\AskMeSpeech.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Dto\AskDto.cs" />
+    <Compile Include="Dto\AskOperation.cs" />
     <Compile Include="Dto\AudioContent.cs" />
+    <Compile Include="Dto\SpeechResponseDto.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -144,6 +157,7 @@
     <Content Include="Scripts\jquery-1.10.2.min.map" />
     <Content Include="Views\Home\Intent.cshtml" />
     <Content Include="Views\Home\Voice.cshtml" />
+    <Content Include="Views\Home\ask.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
