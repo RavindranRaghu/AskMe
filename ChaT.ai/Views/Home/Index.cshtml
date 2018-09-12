@@ -16,12 +16,12 @@
     }
 
     .userDiv {
-        padding: 10px;
+        padding: 5px;
         max-width: 600px;
     }
 
     .userChat {
-        padding: 10px;
+        padding: 5px;
         min-width: 300px;
         max-width: 500px;
         display: block;
@@ -32,13 +32,13 @@
     }
 
     .botDiv {
-        padding: 10px;
+        padding: 5px;
         padding-left: 80px;
         max-width: 600px;
     }
 
     .botChat {
-        padding: 10px;
+        padding: 5px;
         padding-left: 23px;
         min-width: 300px;
         max-width: 500px;
@@ -63,7 +63,6 @@
     }
 
     .tags {
-        width: 123px;
         text-align: left;
         color: crimson;
         border-radius: 10px;
@@ -76,6 +75,14 @@
         padding-top: 30px;
         font-weight: bold;
         padding-bottom: 10px;
+    }
+
+    .tag-body {
+        margin: 5px;
+        padding: 5px;
+        padding-left:10px;
+        background-color: whitesmoke;
+        border-radius: 10px;
     }
 </style>
 
@@ -90,6 +97,7 @@
                     <div class="col-sm-7">
                         <input id="message" class="form-control" type="text" style="min-width:300px;max-width:600px;height:80px;" />
                         <input id="node-level" type="hidden" value="@ViewBag.nodeLevel" />
+                        <input id="welcome-message" type="hidden" value="@ViewBag.Welcome" />
                     </div>
                     <div class="col-sm-2">
                         <button class="btn btn-danger" type="submit" id="saimaa" style="height:80px;width:80px;">
@@ -117,7 +125,7 @@
                 <div id="suggest-list">
                     @foreach (var item in Model)
                     {
-                        <div style="padding-top: 10px;"><div class="tags" data-message="@item.IntentName">@item.IntentName</div></div>
+                        <div class="tag-body"><div class="tags" data-message="@item.IntentName">@item.IntentDescription</div></div>
                     }
                 </div>
             </div>
@@ -129,7 +137,22 @@
 <script>
     $(function () {
 
-        responsiveVoice.speak("Welcome to Chat Bot");
+        var launchMessage = $("#welcome-message").val();
+        var resposeMessage = launchMessage.replace(/<br>/g, "");
+        responsiveVoice.speak(resposeMessage);
+        var launchHtml = '<div style="font-size:larger;font-weight:bold;"><span>' + launchMessage + '</span></div>';
+        launchHtml = '<div class="botDiv" ><span class="botChat"><span class="glyphicon glyphicon-bullhorn"> </span>&nbsp<span>' + launchMessage + '</span></span></div>';
+        $("#chat-history").html(launchHtml);
+
+        $("#message").on("change keyup blur", function () {
+            if ($("#message").val().length > 0) {
+                $("#saimaa").attr("disabled", false);
+            }
+            else {
+                $("#saimaa").attr("disabled", true);
+            }
+        });
+
 
         $("#saimaa").click(function () {
             var message = "  " + $("#message").val();
@@ -194,9 +217,13 @@
             contentType: "application/json",
             success: function (data) {
                 //var arr = $.parseJSON(data);
-                console.log("Response " + data.node);
-                responsiveVoice.speak(data.response);
-                chathtml = chathtml + '<div class="botDiv" ><span class="botChat"><span class="glyphicon glyphicon-bullhorn"> </span>&nbsp<span>' + data.response + '</span></span></div>';
+                var chatResposeMessage = data.response.replace(/<br>/g, "");
+                var splitResponseMessage = data.response.split("<br>");
+                splitResponseMessage.forEach(function (splitMessage) {
+                    chathtml = chathtml + '<div class="botDiv" ><span class="botChat"><span class="glyphicon glyphicon-bullhorn"> </span>&nbsp<span>' + splitMessage + '</span></span></div>';
+                });
+                responsiveVoice.speak(chatResposeMessage);                
+                //chathtml = chathtml + '<div class="botDiv" ><span class="botChat"><span class="glyphicon glyphicon-bullhorn"> </span>&nbsp<span>' + data.response + '</span></span></div>';
                 //chathtml = chathtml + '<p style="float:right"><div >Bot says:</div><div>' + data + '</div></p>';
                 $("#chat-history").html(chathtml);
                 $("#node-level").val(data.node);
@@ -204,7 +231,7 @@
                 var suggestions = data.suggest;
                 var suggestHtml = "";
                 suggestions.forEach(function (element) {
-                    suggestHtml = suggestHtml + '<div style="padding-top: 10px;"><div class="tags" data-message="' + element + '">' + element + '</div></div>';
+                    suggestHtml = suggestHtml + '<div class="tag-body" style="padding-top: 10px;"><div class="tags" data-message="' + element + '">' + element + '</div></div>';
                 });
                 $("#suggest-list").html('<div style="padding-left:23px;"><img src="../Content/img/loader.gif" /><div>');
                 setTimeout(function () {

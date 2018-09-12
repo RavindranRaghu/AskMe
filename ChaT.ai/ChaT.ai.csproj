@@ -133,12 +133,14 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="bLogic\AskMeChannel.cs" />
     <Compile Include="bLogic\AskMeContentManager.cs" />
+    <Compile Include="bLogic\AskMeSuggestionMatch.cs" />
     <Compile Include="bLogic\AskMeHiBye.cs" />
     <Compile Include="bLogic\AskMeSpeech.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Dto\AskDto.cs" />
     <Compile Include="Dto\AskOperation.cs" />
     <Compile Include="Dto\AudioContent.cs" />
+    <Compile Include="Dto\IntentOperation.cs" />
     <Compile Include="Dto\SpeechResponseDto.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>

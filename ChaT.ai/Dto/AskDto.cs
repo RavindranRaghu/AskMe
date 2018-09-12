@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using System.Web.Mvc;
 
 namespace ChaT.ai.Dto
 {
@@ -17,5 +18,11 @@ namespace ChaT.ai.Dto
 
         public DateTime UpdatedDate { get; set; }
 
+    }
+
+    public class AskDtoWithIntentList
+    {
+        public List<AskDto> askList { get; set; }
+        public List<SelectListItem> intents { get; set; }
     }
 }

@@ -13,6 +13,7 @@ namespace ChaT.ai.bLogic
         private int Node = 0;
         private ChatDatabaseModel db;
         private AskMeHiBye hiBye;
+        private AskMeSuggestionMatch suggestionMatch;
         private AskMeContentManager contentManager = new AskMeContentManager();
         KeyValuePair<int, string> finalResponse = new KeyValuePair<int, string>();
         public AskMeChannel(string message, int node)
@@ -21,6 +22,7 @@ namespace ChaT.ai.bLogic
             this.Node = node;
             db = new ChatDatabaseModel();
             hiBye = new AskMeHiBye(Message, Node);
+            suggestionMatch = new AskMeSuggestionMatch(Message, Node);
         }
 
         //ChaT Bot Reponse Main Entry
@@ -134,7 +136,7 @@ namespace ChaT.ai.bLogic
             finalResponse = ChatResponseMain();
             if (finalResponse.Value == contentManager.NoIntentMatchedResponse)
             {
-                var hasParentNode = db.ChatIntent.Where(x => x.ChatIntentId == Node);
+                var hasParentNode = db.ChatIntent.Where(x => x.ChatIntentId == Node && Node != 0);
                 if (hasParentNode.Any())
                 {
                     Node = hasParentNode.Select(y => y.ParentId).FirstOrDefault();
@@ -149,25 +151,40 @@ namespace ChaT.ai.bLogic
         public KeyValuePair<int, string> ChatResponseMain()
         {
             string responseMessage = contentManager.NoIntentMatchedResponse;
-            //string intentMessage = "NoIntentMatched";
-            //string entity = string.Empty;
             TFIDF getVocab = new TFIDF();
             Dictionary<string, string> reponseDict = new Dictionary<string, string>();
 
+            #region 1.CheckIntentGreetingOrGoodbye
             if (hiBye.Greet())
-            {
                 return new KeyValuePair<int, string>(0, contentManager.GreetResponse);
-            }
             else if (hiBye.GoodBye())
-            {
                 return new KeyValuePair<int, string>(0, contentManager.GoodbyeResponse);
-            }
-
-            List<string> vocabList = getVocab.GetVocabulary(Message);
+            #endregion
 
             List<ChatIntent> intentList = (from intention in db.ChatIntent
                                            where intention.ChatIntentId > 2 && intention.ParentId == Node
                                            select intention).ToList();
+
+            #region 2.CheckIntentFullMatchbySuggestion
+            KeyValuePair<int, bool> fullMatch = suggestionMatch.FullMatch(intentList);
+            if (fullMatch.Value)
+            {
+                responseMessage = intentList.Where(x => x.ChatIntentId == fullMatch.Key).Select(x => x.Response).FirstOrDefault();
+                return new KeyValuePair<int, string>(fullMatch.Key, responseMessage);
+            }
+
+            KeyValuePair<int, bool> partialMatch = suggestionMatch.PartialMatch(intentList);
+            if (partialMatch.Value)
+            {
+                responseMessage = intentList.Where(x => x.ChatIntentId == partialMatch.Key).Select(x => x.Response).FirstOrDefault();
+                return new KeyValuePair<int, string>(partialMatch.Key, responseMessage);
+            }
+            #endregion
+
+
+            List<string> vocabList = getVocab.GetVocabulary(Message);
+            if (vocabList.Count == 0)
+                return new KeyValuePair<int, string>(Node, responseMessage);
 
             foreach (string vocab in vocabList)
             {

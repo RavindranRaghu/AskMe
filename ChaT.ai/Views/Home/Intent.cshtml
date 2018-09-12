@@ -1,14 +1,27 @@
-﻿@model IEnumerable<ChaT.db.ChatIntent>
+﻿@model IEnumerable<ChaT.ai.Dto.ChatIntentDto>
 
 @{
     ViewBag.Title = "Intent";
+    List<SelectListItem> intentNames = ViewBag.intentNames as List<SelectListItem>;
 }
 
-<h2>Intent</h2>
+<style>
+    .form-control {
+        margin-bottom: 10px;
+    }
+    .page-subheader {
+        font-size: x-large;
+    }
+</style>
 
-<p>
-    @Html.ActionLink("Create New", "Create")
-</p>
+<div style="padding:23px;">
+    <span class="page-subheader">Intent</span>
+    <button type="button" class="btn btn-link newProject"
+            data-toggle="modal"
+            data-target="#projectModal">
+        Create
+    </button>
+</div>
 <table class="table">
     <tr>
         <th>
@@ -18,12 +31,14 @@
             @Html.DisplayNameFor(model => model.IntentDescription)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.ParentId)
+            @Html.DisplayNameFor(model => model.ParentName)
         </th>
-        <th></th>
+        <th>Edit</th>
+        <th>Delete</th>
     </tr>
 
-@foreach (var item in Model) {
+    @foreach (var item in Model)
+    {
     <tr>
         <td>
             @Html.DisplayFor(modelItem => item.IntentName)
@@ -32,14 +47,205 @@
             @Html.DisplayFor(modelItem => item.IntentDescription)
         </td>
         <td>
-            @Html.DisplayFor(modelItem => item.ParentId)
+            @Html.DisplayFor(modelItem => item.ParentName)
         </td>
         <td>
-            @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
-            @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
-            @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
+            <button type="button" class="btn btn-default glyphicon glyphicon-edit openExistingProject"
+                    data-toggle="modal" 
+                    data-parentid="@item.ParentId" 
+                    data-parentname="@item.ParentName"
+                    data-response="@item.Response" 
+                    data-intentid="@item.ChatIntentId" 
+                    data-intentname="@item.IntentName" 
+                    data-intentdesc="@item.IntentDescription" 
+                    data-lastupdated="@item.UpdatedDate" 
+                    data-target="#projectModal">
+            </button>
+        </td>
+        <td>
+            <button type="button" class="btn btn-default glyphicon glyphicon-trash deleteExistingProject"
+                    data-toggle="modal" 
+                    data-parentid="@item.ParentId"
+                    data-parentname="@item.ParentName"
+                    data-response="@item.Response" 
+                    data-intentid="@item.ChatIntentId" 
+                    data-intentname="@item.IntentName" 
+                    data-intentdesc="@item.IntentDescription" 
+                    data-lastupdated="@item.UpdatedDate"
+                    data-target="#projectModal">
+            </button>
         </td>
     </tr>
-}
+    }
 
 </table>
+
+
+<div id="projectModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="appHeading">Intent</h4>
+                <div><span style="color:dodgerblue" id="lastUpdated"></span></div>
+            </div>
+
+            <div class="modal-body">
+                <input type="hidden" id="intent-id" />
+                <input type="hidden" id="parent-id" />
+                <input type="hidden" id="operation" />
+                <input type="hidden" id="table-reload" value="n" />
+
+                <div class="row">
+                    <div class="col-sm-2">Name</div>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="intent-name" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-2">Description</div>
+                    <div class="col-sm-10"><input type="text" class="form-control" id="intent-desc" /></div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-2">Parent</div>
+                    @*<input type="text" class="form-control" id="parent" />*@
+                    <div class="col-sm-10">
+                        <select class="form-control" name="parent" id="parent">
+                            @{
+                                foreach (SelectListItem intent in intentNames)
+                                {
+                                    <option value="@intent.Value">@intent.Text</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-2">Response</div>
+                    <div class="col-sm-10"><input type="text" class="form-control" id="response" /></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="saveProject" type="button" class="btn btn-default">Save</button>
+                <button id="closeProject" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+        $(function () {
+
+            $(document).ready(function () {
+                $('#questionTable').DataTable({
+                    "pageLength": 50
+                });
+            });
+
+            //open Modal for existing project
+
+            $(document).on('click', '.openExistingProject', function () {
+                $('#saveProject').html('Update');
+                $('#saveProject').removeAttr('disabled');
+                $('#questionId').val($(this).data('id'));
+                $('#intent-id').val($(this).data('intentid'));
+                $('#intent-name').val($(this).data('intentname'));
+                $('#intent-desc').val($(this).data('intentdesc'));
+                $('#response').val($(this).data('response'));
+                $('#parent option:selected').text($(this).data('parentname'));
+                console.log($(this).data('parentname'));
+                $('#parent').val($(this).data('parentid'));
+                $('#parent-id').val($(this).data('parentid'));
+                $('#lastUpdated').html('Last Updated: ' + $(this).data('lastupdated'));
+                $('#operation').val("u");
+            });
+
+            //open Modal for delete
+
+            $(document).on('click', '.deleteExistingProject', function () {
+                $('#saveProject').html('Delete');
+                $('#saveProject').removeAttr('disabled');
+                $('#questionId').val($(this).data('id'));
+                $('#intent-id').val($(this).data('intentid'));
+                $('#intent-name').val($(this).data('intentname'));
+                $('#intent-desc').val($(this).data('intentdesc'));
+                $('#response').val($(this).data('response'));
+                $('#parent option:selected').text($(this).data('parentname'));
+                $('#parent').val($(this).data('parentid'));
+                $('#parent-id').val($(this).data('parentid'));
+                $('#lastUpdated').html('Last Updated: ' + $(this).data('lastupdated'));
+                $('#operation').val("d");
+            });
+
+
+            //open Modal for new project
+
+            $(document).on('click', '.newProject', function () {
+                $('#saveProject').html('Add');
+                $('#saveProject').removeAttr('disabled');
+                $('#intent-id').val(0);
+                $('#lastUpdated').html('Adding New Project');
+                $('#operation').val("a");
+            });
+
+
+
+            // save project
+
+            $(document).on('click', '#saveProject', function () {
+                var intentId = $('#intent-id').val(); // $('#intendId').val();
+                var intentName = $('#intent-name').val();
+                var intentdesc = $('#intent-desc').val();
+                var questionId = $('#questionId').val();
+                var parentId = $('#parent').val();
+                var parentName = $('#parent option:selected').text();
+                var response = $('#response').val();
+                var operation = $('#operation').val();
+                var updatedDate = new Date;
+                var project = { ChatIntentId: intentId, IntentName: intentName, IntentDescription: intentdesc, ParentId: parentId, ParentName: parentName, Response: response, UpdatedDate: updatedDate };
+                var finalProject = { intent: project, operation: operation };
+                $.ajax({
+                    type: "POST",
+                    url: "/home/IntentUpdate/",
+                    data: JSON.stringify(finalProject),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (result) {
+                        if (result == true) {
+                            $('#lastUpdated').html('Updated Successfully <span style="color:green" class="glyphicon glyphicon-ok-circle"> </span>');
+                            $('#table-reload').val("y");
+                            $('#saveProject').attr('disabled', 'disabled');
+                        }
+                        else {
+                            $('#lastUpdated').html('Updated Failed <span style="color:red" class="glyphicon glyphicon-remove-circle"> </span>');
+                            $('#table-reload').val("n");
+                            $('#saveProject').removeAttr('disabled');
+                        }
+                    },
+                    error: function (errorMsg) {
+                        $('#lastUpdated').html('<span class="alert alert-warning">' + errorMsg.statusText + '</span> ');
+                    }
+                });
+            });
+
+
+
+            //Close Modal
+
+            $(document).on('click', '#closeProject', function () {
+                if ($('#table-reload').val() == "y") {
+                    location.reload();
+                }
+            });
+
+            $('#parent').change(function () {
+               $('#parent-id').val($(this).val());
+            });
+
+        });
+
+
+
+</script>

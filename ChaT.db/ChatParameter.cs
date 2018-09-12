@@ -6,17 +6,19 @@ namespace ChaT.db
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Data.Entity.Spatial;
 
-    [Table("ChatIntentQuestion")]
-    public partial class ChatIntentQuestion
+    [Table("dbo.ChatParameter")]
+    public partial class ChatParameter
     {
         [Key]
-        public int QuestionId { get; set; }
+        public int ParameterId { get; set; }
 
         [StringLength(2300)]
-        public string QuestionDesc { get; set; }
+        public string ParameterName { get; set; }
 
-        public int ChatIntentId { get; set; }
+        [StringLength(2300)]
+        public string ParameterValue { get; set; }
 
+        [Column(TypeName = "datetime2")]
         public DateTime UpdatedDate { get; set; }
     }
 }

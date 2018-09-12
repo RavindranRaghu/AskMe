@@ -88,6 +88,7 @@
   <ItemGroup>
     <Compile Include="ChatDatabaseModel.cs" />
     <Compile Include="ChatEntity.cs" />
+    <Compile Include="ChatParameter.cs" />
     <Compile Include="ChatIntentQuestion.cs" />
     <Compile Include="ChatIntent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
