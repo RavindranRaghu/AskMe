@@ -1,0 +1,208 @@
+﻿@model IEnumerable<ChaT.db.ChatParameter>
+
+@{
+    ViewBag.Title = "param";
+}
+
+<style>
+    .form-control {
+        margin-bottom: 10px;
+    }
+
+    .page-subheader {
+        font-size: x-large;
+    }
+</style>
+
+<div style="padding:23px;">
+    <span class="page-subheader">Parameter</span>
+    <button type="button" class="btn btn-link newProject"
+            data-toggle="modal"
+            data-target="#projectModal">
+        Create
+    </button>
+</div>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.ParameterName)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.ParameterValue)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.UpdatedDate)
+        </th>
+        <th>Edit</th>
+        <th>Delete</th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.ParameterName)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.ParameterValue)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.UpdatedDate)
+        </td>
+        <td>
+            <button type="button" class="btn btn-default glyphicon glyphicon-edit openExistingProject"
+                    data-toggle="modal"
+                    data-paramid="@item.ParameterId"
+                    data-paramname="@item.ParameterName"
+                    data-paramvalue="@item.ParameterValue"
+                    data-lastupdated="@item.UpdatedDate"
+                    data-target="#projectModal"></button>
+        </td>
+        <td>
+            <button type="button" class="btn btn-default glyphicon glyphicon-trash deleteExistingProject"
+                    data-toggle="modal"
+                    data-paramid="@item.ParameterId"
+                    data-paramname="@item.ParameterName"
+                    data-paramvalue="@item.ParameterValue"
+                    data-lastupdated="@item.UpdatedDate"
+                    data-target="#projectModal"></button>
+        </td>
+    </tr>
+    }
+
+</table>
+
+
+
+<div id="projectModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="appHeading">Parameter</h4>
+                <div><span style="color:dodgerblue" id="lastUpdated"></span></div>
+            </div>
+
+            <div class="modal-body">
+                <input type="hidden" id="param-id" />
+                <input type="hidden" id="operation" />
+                <input type="hidden" id="table-reload" value="n" />
+
+                <div class="row">
+                    <div class="col-sm-2">Name</div>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="param-name" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-2">Value</div>
+                    <div class="col-sm-10"><input type="text" class="form-control" id="param-value" /></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="saveProject" type="button" class="btn btn-default">Save</button>
+                <button id="closeProject" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+        $(function () {
+
+            $(document).ready(function () {
+                $('#questionTable').DataTable({
+                    "pageLength": 50
+                });
+            });
+
+            //open Modal for existing project
+
+            $(document).on('click', '.openExistingProject', function () {
+                $('#saveProject').html('Update');
+                $('#saveProject').removeAttr('disabled');
+                $('#param-id').val($(this).data('paramid'));
+                $('#param-name').val($(this).data('paramname'));
+                $('#param-value').val($(this).data('paramvalue'));
+                $('#lastUpdated').html('Last Updated: ' + $(this).data('lastupdated'));
+                $('#operation').val("u");
+            });
+
+            //open Modal for delete
+
+            $(document).on('click', '.deleteExistingProject', function () {
+                $('#saveProject').html('Delete');
+                $('#saveProject').removeAttr('disabled');
+                $('#param-id').val($(this).data('paramid'));
+                $('#param-name').val($(this).data('paramname'));
+                $('#param-value').val($(this).data('paramvalue'));
+                $('#lastUpdated').html('Last Updated: ' + $(this).data('lastupdated'));
+                $('#operation').val("d");
+            });
+
+
+            //open Modal for new project
+
+            $(document).on('click', '.newProject', function () {
+                $('#saveProject').html('Add');
+                $('#saveProject').removeAttr('disabled');
+                $('#param-id').val(0);
+                $('#lastUpdated').html('Adding New Project');
+                $('#operation').val("a");
+            });
+
+            // save project
+
+            $(document).on('click', '#saveProject', function () {
+                var paramId = $('#param-id').val(); // $('#intendId').val();
+                var paramName = $('#param-name').val();
+                var paramValue = $('#param-value').val();
+                var operation = $('#operation').val();
+                var updatedDate = new Date;
+                var project = { ParameterId: paramId, ParameterName: paramName, ParameterValue: paramValue, UpdatedDate: updatedDate };
+                var finalProject = { param: project, operation: operation };
+                $.ajax({
+                    type: "POST",
+                    url: "/home/ParamUpdate/",
+                    data: JSON.stringify(finalProject),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (result) {
+                        if (result == true) {
+                            $('#lastUpdated').html('Updated Successfully <span style="color:green" class="glyphicon glyphicon-ok-circle"> </span>');
+                            $('#table-reload').val("y");
+                            $('#saveProject').attr('disabled', 'disabled');
+                        }
+                        else {
+                            $('#lastUpdated').html('Updated Failed <span style="color:red" class="glyphicon glyphicon-remove-circle"> </span>');
+                            $('#table-reload').val("n");
+                            $('#saveProject').removeAttr('disabled');
+                        }
+                    },
+                    error: function (errorMsg) {
+                        $('#lastUpdated').html('<span class="alert alert-warning">' + errorMsg.statusText + '</span> ');
+                    }
+                });
+            });
+
+
+
+            //Close Modal
+
+            $(document).on('click', '#closeProject', function () {
+                if ($('#table-reload').val() == "y") {
+                    location.reload();
+                }
+            });
+
+            $('#parent').change(function () {
+               $('#parent-id').val($(this).val());
+            });
+
+        });
+
+
+
+</script>

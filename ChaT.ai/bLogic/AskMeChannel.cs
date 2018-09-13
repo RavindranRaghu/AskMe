@@ -186,53 +186,52 @@ namespace ChaT.ai.bLogic
             if (vocabList.Count == 0)
                 return new KeyValuePair<int, string>(Node, responseMessage);
 
-            foreach (string vocab in vocabList)
-            {
-                var hasIntent = intentList.Where(x => x.ParentId == Node).Where(x => vocab.Contains(x.IntentName) || x.IntentName.Contains(vocab));
-                if (hasIntent.Any())
-                {
-                    Dictionary<int, string> intentDict = hasIntent.Select(t => new { t.ChatIntentId, t.IntentName }).ToList().ToDictionary(x => x.ChatIntentId, y => y.IntentName);
-                    foreach (KeyValuePair<int, string> intent in intentDict)
-                    {
-                        KeyValuePair<int, string> childIntent = GetChildIntent(intent.Key, vocabList);
-                        if (string.IsNullOrEmpty(childIntent.Value))
-                        {
-                            responseMessage = intentList.Where(x => x.ChatIntentId == intent.Key).Select(y => y.Response).FirstOrDefault();
-                            Node = intent.Key;
-                        }
-                        else
-                        {
-                            responseMessage = childIntent.Value;
-                            Node = childIntent.Key;
-                        }
-                        return new KeyValuePair<int, string>(Node, responseMessage);
-                    }
-                }
-            }
-
-            Dictionary<int, string> intentNameDict = intentList.Select(t => new { t.ChatIntentId, t.IntentName }).ToList().ToDictionary(x => x.ChatIntentId, y => y.IntentName);
-            LevenshteinDistance dist = new LevenshteinDistance();
-            foreach (string vocab in vocabList)
-            {
-                foreach (KeyValuePair<int, string> intent in intentNameDict)
-                {
-                    if (dist.Compute(vocab, intent.Value) < 4)
-                    {
-                        KeyValuePair<int, string> childIntent = GetChildIntent(intent.Key, vocabList);
-                        if (string.IsNullOrEmpty(childIntent.Value))
-                        {
-                            responseMessage = intentList.Where(x => x.ChatIntentId == intent.Key).Select(y => y.Response).FirstOrDefault();
-                            Node = intent.Key;
-                        }
-                        else
-                        {
-                            responseMessage = childIntent.Value;
-                            Node = childIntent.Key;
-                        }
-                        return new KeyValuePair<int, string>(Node, responseMessage);
-                    }
-                }
-            }
+            //foreach (string vocab in vocabList)
+            //{
+            //    var hasIntent = intentList.Where(x => x.ParentId == Node).Where(x => vocab.Contains(x.IntentName) || x.IntentName.Contains(vocab));
+            //    if (hasIntent.Any())
+            //    {
+            //        Dictionary<int, string> intentDict = hasIntent.Select(t => new { t.ChatIntentId, t.IntentName }).ToList().ToDictionary(x => x.ChatIntentId, y => y.IntentName);
+            //        foreach (KeyValuePair<int, string> intent in intentDict)
+            //        {
+            //            KeyValuePair<int, string> childIntent = GetChildIntent(intent.Key, vocabList);
+            //            if (string.IsNullOrEmpty(childIntent.Value))
+            //            {
+            //                responseMessage = intentList.Where(x => x.ChatIntentId == intent.Key).Select(y => y.Response).FirstOrDefault();
+            //                Node = intent.Key;
+            //            }
+            //            else
+            //            {
+            //                responseMessage = childIntent.Value;
+            //                Node = childIntent.Key;
+            //            }
+            //            return new KeyValuePair<int, string>(Node, responseMessage);
+            //        }
+            //    }
+            //}
+            //Dictionary<int, string> intentNameDict = intentList.Select(t => new { t.ChatIntentId, t.IntentName }).ToList().ToDictionary(x => x.ChatIntentId, y => y.IntentName);
+            //LevenshteinDistance dist = new LevenshteinDistance();
+            //foreach (string vocab in vocabList)
+            //{
+            //    foreach (KeyValuePair<int, string> intent in intentNameDict)
+            //    {
+            //        if (dist.Compute(vocab, intent.Value) < 4)
+            //        {
+            //            KeyValuePair<int, string> childIntent = GetChildIntent(intent.Key, vocabList);
+            //            if (string.IsNullOrEmpty(childIntent.Value))
+            //            {
+            //                responseMessage = intentList.Where(x => x.ChatIntentId == intent.Key).Select(y => y.Response).FirstOrDefault();
+            //                Node = intent.Key;
+            //            }
+            //            else
+            //            {
+            //                responseMessage = childIntent.Value;
+            //                Node = childIntent.Key;
+            //            }
+            //            return new KeyValuePair<int, string>(Node, responseMessage);
+            //        }
+            //    }
+            //}
 
             SimilarityCalculator similarityCalculator = new SimilarityCalculator();
             List<ChatIntentQuestion> questionList = db.ChatIntentQuestion.ToList();
@@ -252,17 +251,19 @@ namespace ChaT.ai.bLogic
             if (compareHigh > 0)
             {
                 string response = db.ChatIntent.Where(x => x.ChatIntentId == questionHighestMatch.Value).Select(y => y.Response).FirstOrDefault();
-                KeyValuePair<int, string> childIntent = GetChildIntent(questionHighestMatch.Value, vocabList);
-                if (string.IsNullOrEmpty(childIntent.Value))
-                {
-                    responseMessage = response;
-                    Node = questionHighestMatch.Value;
-                }
-                else
-                {
-                    responseMessage = childIntent.Value;
-                    Node = childIntent.Key;
-                }
+                //KeyValuePair<int, string> childIntent = GetChildIntent(questionHighestMatch.Value, vocabList);
+                //if (string.IsNullOrEmpty(childIntent.Value))
+                //{
+                //    responseMessage = response;
+                //    Node = questionHighestMatch.Value;
+                //}
+                //else
+                //{
+                //    responseMessage = childIntent.Value;
+                //    Node = childIntent.Key;
+                //}
+                responseMessage = response;
+                Node = questionHighestMatch.Value;
                 return new KeyValuePair<int, string>(Node, responseMessage);
             }
 

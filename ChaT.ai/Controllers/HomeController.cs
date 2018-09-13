@@ -150,6 +150,11 @@ namespace ChaT.ai.Controllers
             return View(question);
         }
 
+        public ActionResult param()
+        {
+            return View(db.ChatParameter.ToList());
+        }
+
         public JsonResult QuestionUpdate(AskOperation askOperation)
         {
             AskDto ask = askOperation.ask;
@@ -243,6 +248,49 @@ namespace ChaT.ai.Controllers
         public ActionResult Voice()
         {
             return View();
+        }
+
+        public JsonResult ParamUpdate(ParamOperation parmOperation)
+        {
+            ChatParameter param = parmOperation.param;
+            string operation = parmOperation.Operation;
+            ChatParameter finalParam = new ChatParameter();
+            bool changed = false;
+            param.UpdatedDate = DateTime.UtcNow;
+            try
+            {
+                if (operation == "a")
+                {
+                    finalParam.ParameterName = param.ParameterName;
+                    finalParam.ParameterValue = param.ParameterValue;
+                    finalParam.UpdatedDate = DateTime.Now;
+                    db.ChatParameter.Add(finalParam);
+                }
+                else if (operation == "u")
+                {
+                    finalParam = db.ChatParameter.Where(x => x.ParameterId== param.ParameterId).FirstOrDefault();
+                    finalParam.ParameterName = param.ParameterName;
+                    finalParam.ParameterValue = param.ParameterValue;
+                    finalParam.UpdatedDate = DateTime.Now;
+                }
+                else
+                {
+                    finalParam = db.ChatParameter.Where(x => x.ParameterId == param.ParameterId).FirstOrDefault();
+                    db.ChatParameter.Attach(finalParam);
+                    db.ChatParameter.Remove(finalParam);
+                }
+                changed = true;
+                db.SaveChanges();
+                return Json(changed, JsonRequestBehavior.AllowGet);
+            }
+
+            catch (Exception e)
+
+            {
+                Console.WriteLine(e.Message);
+                return Json(changed, JsonRequestBehavior.AllowGet);
+            }
+
         }
 
         [HttpPost]

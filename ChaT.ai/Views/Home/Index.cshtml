@@ -66,7 +66,7 @@
         text-align: left;
         color: crimson;
         border-radius: 10px;
-        font-size: x-large;
+        font-size: large;
     }
 
     .tag-header {
@@ -80,6 +80,7 @@
     .tag-body {
         margin: 5px;
         padding: 5px;
+        margin-bottom:10px;
         padding-left:10px;
         background-color: whitesmoke;
         border-radius: 10px;
@@ -125,7 +126,7 @@
                 <div id="suggest-list">
                     @foreach (var item in Model)
                     {
-                        <div class="tag-body"><div class="tags" data-message="@item.IntentName">@item.IntentDescription</div></div>
+                        <div class="tag-body"><div class="tags" data-message="@item.IntentDescription">@item.IntentDescription</div></div>
                     }
                 </div>
             </div>
@@ -166,7 +167,7 @@
             getChatResponse(data1, chathtml);
         });
 
-        $(".tags").click(function () {
+        $(document).on("click", ".tags", function () {
             var message = $(this).data("message");
             var chathtml = $("#chat-history").html();
             var node = $("#node-level").val();
@@ -176,6 +177,10 @@
             chathtml = chathtml + '<div class="userDiv"><span class="userChat"><span class="glyphicon glyphicon-user"> </span>&nbsp<span>' + message + '</span></span></div>';
             var data1 = { sender: "default", message: message, node: node };
             getChatResponse(data1, chathtml);
+        });
+
+        $(".tags").click(function () {
+
         });
 
 

@@ -140,6 +140,7 @@
     <Compile Include="Dto\AskDto.cs" />
     <Compile Include="Dto\AskOperation.cs" />
     <Compile Include="Dto\AudioContent.cs" />
+    <Compile Include="Dto\ParamOperation.cs" />
     <Compile Include="Dto\IntentOperation.cs" />
     <Compile Include="Dto\SpeechResponseDto.cs" />
     <Compile Include="Global.asax.cs">
@@ -160,6 +161,7 @@
     <Content Include="Views\Home\Intent.cshtml" />
     <Content Include="Views\Home\Voice.cshtml" />
     <Content Include="Views\Home\ask.cshtml" />
+    <Content Include="Views\Home\param.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
