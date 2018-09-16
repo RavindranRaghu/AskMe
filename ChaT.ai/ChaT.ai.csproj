@@ -140,6 +140,8 @@
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
+    <Content Include="Scripts\featuresub.js" />
+    <Content Include="Scripts\feature.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />
     <Content Include="Content\jquery.dataTables.min.css" />
@@ -162,6 +164,7 @@
     <Compile Include="Dto\AskDto.cs" />
     <Compile Include="Dto\AskOperation.cs" />
     <Compile Include="Dto\AudioContent.cs" />
+    <Compile Include="Dto\FeatureDto.cs" />
     <Compile Include="Dto\ParamOperation.cs" />
     <Compile Include="Dto\IntentOperation.cs" />
     <Compile Include="Dto\SpeechResponseDto.cs" />

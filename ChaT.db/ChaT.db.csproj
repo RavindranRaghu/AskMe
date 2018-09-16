@@ -89,6 +89,8 @@
     <Compile Include="ChatDatabaseModel.cs" />
     <Compile Include="ChatEntity.cs" />
     <Compile Include="ChatFailureResponse.cs" />
+    <Compile Include="ChatSubFeatureList.cs" />
+    <Compile Include="ChatFeatureList.cs" />
     <Compile Include="ChatParameter.cs" />
     <Compile Include="ChatIntentQuestion.cs" />
     <Compile Include="ChatIntent.cs" />

@@ -1,50 +1,267 @@
-﻿
+﻿@model ChaT.ai.Dto.FeatureDto
 @{
     ViewBag.Title = "Admin";
 }
-c
+<style>
+    .form-control {
+        margin-bottom: 10px;
+    }
+
+    .page-subheader {
+        font-size: x-large;
+    }
+</style>
+<div style="padding-top:23px;">
+    <span class="page-subheader">Feature</span>
+    <button type="button" class="btn btn-link newProject"
+            data-toggle="modal"
+            data-target="#projectModal">
+        Add Feature
+    </button>
+</div>
 <div style="padding-top:23px;">
     @Html.Partial("_AdminPartial")
 </div>
 
-<div style="padding:80px;font-size:x-large;">
-    <table class="table" id="questionTable">
-        <thead>
-            <tr>
-                <th>
-                    Usage Analysis
-                </th>
-                <th>
-                    #
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>
-                    Number of Sessions
-                </td>
-                <td>
-                    35
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    Number of Sessions
-                </td>
-                <td>
-                    35
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    Number of Sessions
-                </td>
-                <td>
-                    35
-                </td>
-            </tr>
-        </tbody>
-    </table>
+<table class="table" id="questionTable">
+    <thead>
+        <tr>
+            <th>Feature Name</th>
+            <th>Feature Description</th>
+            <th>Story Groomed</th>
+            <th>Dev Status</th>
+            <th>Estimated Hrs</th>
+            <th>Actual Hrs</th>
+            <th>Sub Feature</th>
+            <th>Edit</th>
+            <th>Delete</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            foreach (var item in Model.feature)
+            {
+                int story = (item.StoryGroomed) ? 1 : 0;
+                int dev = (item.DevelopmentComplete) ? 1 : 0;
+                <tr>
+                    <td>@item.FeatureName</td>
+                    <td>@item.FeatureDesc</td>
+                    @{ if (item.StoryGroomed)
+                        {
+                            <td><span class="glyphicon glyphicon-ok" style="color:green;font-size:large"></span></td>
+                        }
+                        else
+                        {
+                            <td><span class="glyphicon glyphicon-minus"></span></td>
+                        }
+                    }
+                    @{ if (item.DevelopmentComplete)
+                        {
+                            <td><span class="glyphicon glyphicon-ok-circle"></span></td>
+                        }
+                        else
+                        {
+                            <td><span class="glyphicon glyphicon-minus"></span></td>
+                        }
+                    }
+                    <td></td>
+                    <td></td>
+                    <td>
+                        <button type="button" class="btn btn-default glyphicon glyphicon-plus newSubFeature"
+                                data-toggle="modal"
+                                data-featureid="@item.FeatureId"
+                                data-target="#subFeatureModal">
+                        </button>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-default glyphicon glyphicon-edit openExistingProject"
+                                data-toggle="modal"
+                                data-featureid="@item.FeatureId"
+                                data-featurename="@item.FeatureName"
+                                data-featuredesc="@item.FeatureDesc"
+                                data-featurestory="@story"
+                                data-featuredev="@dev"
+                                data-lastupdated="@item.UpdatedDate"
+                                data-target="#projectModal"></button>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-default glyphicon glyphicon-trash deleteExistingProject"
+                                data-toggle="modal"
+                                data-featureid="@item.FeatureId"
+                                data-featurename="@item.FeatureName"
+                                data-featuredesc="@item.FeatureDesc"
+                                data-featurestory="@story"
+                                data-featuredev="@dev"
+                                data-lastupdated="@item.UpdatedDate"
+                                data-target="#projectModal"></button>
+                    </td>
+                </tr>
+                foreach (var subitem in Model.subfeature)
+                {
+                    int substory = (subitem.StoryGroomed) ? 1 : 0;
+                    int subdev = (subitem.DevelopmentComplete) ? 1 : 0;
+                    if (subitem.FeatureId == item.FeatureId)
+                    {
+                        <tr>
+                            <td>@subitem.SubFeatureName</td>
+                            <td>@subitem.SubFeatureDesc</td>
+                            <td>@subitem.StoryGroomed</td>
+                            <td>@subitem.DevelopmentComplete</td>
+                            <td>@subitem.EffortEstimated</td>
+                            <td>@subitem.EffortActual</td>
+                            <td>
+                                <button type="button" class="btn btn-default glyphicon glyphicon-edit openExistingSubFeature"
+                                        data-toggle="modal"
+                                        data-featureid="@subitem.FeatureId"
+                                        data-subfeatureid="@subitem.SubFeatureId"
+                                        data-subfeaturename="@subitem.SubFeatureName"
+                                        data-subfeaturedesc="@subitem.SubFeatureDesc"
+                                        data-subfeaturestory="@substory"
+                                        data-subfeaturedev="@subdev"
+                                        data-estimated="@subitem.EffortEstimated"
+                                        data-actual="@subitem.EffortActual"
+                                        data-lastupdated="@subitem.UpdatedDate"
+                                        data-target="#subFeatureModal"></button>
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-default glyphicon glyphicon-trash deleteExistingSubFeature"
+                                        data-toggle="modal"
+                                        data-featureid="@subitem.FeatureId"
+                                        data-subfeatureid="@subitem.SubFeatureId"
+                                        data-featurename="@subitem.SubFeatureName"
+                                        data-featuredesc="@subitem.SubFeatureDesc"
+                                        data-featurestory="@substory"
+                                        data-featuredev="@subdev"
+                                        data-estimated="@subitem.EffortEstimated"
+                                        data-actual="@subitem.EffortActual"
+                                        data-lastupdated="@subitem.UpdatedDate"
+                                        data-target="#subFeatureModal"></button>
+                            </td>
+                        </tr>
+                    }
+                }
+            }
+        }
+    </tbody>
+</table>
 
+
+<div id="projectModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="appHeading">Feature</h4>
+                <div><span style="color:dodgerblue" id="lastUpdated"></span></div>
+            </div>
+
+            <div class="modal-body">
+                <input type="hidden" id="feature-id" />
+                <input type="hidden" id="operation" />
+                <input type="hidden" id="table-reload" value="n" />
+
+                <div class="row">
+                    <div class="col-sm-2">Name</div>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="feature-name" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-2">Description</div>
+                    <div class="col-sm-10"><input type="text" class="form-control" id="feature-desc" /></div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-2">Story</div>
+                    <div class="col-sm-10">
+                        <select class="form-control" name="feature-story" id="feature-story">
+                            <option value="1" selected>Yes</option>
+                            <option value="0">No</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-2">Dev Status</div>
+                    <div class="col-sm-10">
+                        <select class="form-control" name="feature-dev" id="feature-dev">
+                            <option value="1">Yes</option>
+                            <option value="0" selected>No</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="saveProject" type="button" class="btn btn-default">Save</button>
+                <button id="closeProject" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
 </div>
+
+<div id="subFeatureModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="appHeading">Feature</h4>
+                <div><span style="color:dodgerblue" id="lastUpdatedSub"></span></div>
+            </div>
+
+            <div class="modal-body">
+                <input type="hidden" id="feature-id" />
+                <input type="hidden" id="subfeature-id" />
+                <input type="hidden" id="operation" />
+                <input type="hidden" id="table-reload" value="n" />
+
+                <div class="row">
+                    <div class="col-sm-2">Name</div>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="subfeature-name" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-2">Description</div>
+                    <div class="col-sm-10"><input type="text" class="form-control" id="subfeature-desc" /></div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-2">Story</div>
+                    <div class="col-sm-10">
+                        <select class="form-control" name="subfeature-story" id="subfeature-story">
+                            <option value="1" selected>Yes</option>
+                            <option value="0">No</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-2">Dev Status</div>
+                    <div class="col-sm-10">
+                        <select class="form-control" name="subfeature-dev" id="subfeature-dev">
+                            <option value="1">Yes</option>
+                            <option value="0" selected>No</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-2">Estimated Hrs</div>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="subestimated" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-2">Actual Hrs</div>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="subactual" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="saveSubFeature" type="button" class="btn btn-default">Save</button>
+                <button id="closeSubFeature" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/Scripts/feature.js"></script>
+<script src="~/Scripts/featuresub.js"></script>

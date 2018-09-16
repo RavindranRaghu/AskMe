@@ -185,7 +185,10 @@ namespace ChaT.ai.Controllers
 
         public ActionResult Admin()
         {
-            return View();
+            FeatureDto featureDto = new FeatureDto();
+            featureDto.feature = db.ChatFeatureList.ToList();
+            featureDto.subfeature = db.ChatSubFeatureList.ToList();
+            return View(featureDto);
         }
 
         public JsonResult QuestionUpdate(AskOperation askOperation)
@@ -379,6 +382,102 @@ namespace ChaT.ai.Controllers
                 ChatFailureResponse fail = db.ChatFailureResponse.Where(x => x.DefectId == questionId).FirstOrDefault();
                 fail.Reviewed = true;
                 fail.UpdatedDate = DateTime.Now;
+                changed = true;
+                db.SaveChanges();
+                return Json(changed, JsonRequestBehavior.AllowGet);
+            }
+
+            catch (Exception e)
+
+            {
+                Console.WriteLine(e.Message);
+                return Json(changed, JsonRequestBehavior.AllowGet);
+            }
+
+        }
+
+        public JsonResult FeatureUpdate(FeatureOperation featureOperation)
+        {
+            ChatFeatureList featureDto = featureOperation.feature;
+            string operation = featureOperation.Operation;
+            ChatFeatureList feature = new ChatFeatureList();
+            bool changed = false;
+            feature.UpdatedDate = DateTime.UtcNow;
+            try
+            {
+                if (operation == "a")
+                {
+                    feature.FeatureName = featureDto.FeatureName;
+                    feature.FeatureDesc = featureDto.FeatureDesc;
+                    feature.StoryGroomed = featureDto.StoryGroomed;
+                    feature.DevelopmentComplete = featureDto.DevelopmentComplete;
+                    feature.UpdatedDate = DateTime.Now;
+                    db.ChatFeatureList.Add(feature);
+                }
+                else if (operation == "u")
+                {
+                    feature = db.ChatFeatureList.Where(x => x.FeatureId == featureDto.FeatureId).FirstOrDefault();
+                    feature.FeatureName = featureDto.FeatureName;
+                    feature.FeatureDesc = featureDto.FeatureDesc;
+                    feature.StoryGroomed = featureDto.StoryGroomed;
+                    feature.DevelopmentComplete = featureDto.DevelopmentComplete;
+                    feature.UpdatedDate = DateTime.Now;
+                }
+                else
+                {
+                    feature = db.ChatFeatureList.Where(x => x.FeatureId == featureDto.FeatureId).FirstOrDefault();
+                    db.ChatFeatureList.Attach(feature);
+                    db.ChatFeatureList.Remove(feature);
+                }
+                changed = true;
+                db.SaveChanges();
+                return Json(changed, JsonRequestBehavior.AllowGet);
+            }
+
+            catch (Exception e)
+
+            {
+                Console.WriteLine(e.Message);
+                return Json(changed, JsonRequestBehavior.AllowGet);
+            }
+
+        }
+
+        public JsonResult SubFeatureUpdate(SubFeatureOperation subfeatureOperation)
+        {
+            ChatSubFeatureList featureDto = subfeatureOperation.subfeature;
+            string operation = subfeatureOperation.Operation;
+            ChatSubFeatureList feature = new ChatSubFeatureList();
+            bool changed = false;
+            feature.UpdatedDate = DateTime.UtcNow;
+            try
+            {
+                if (operation == "a")
+                {
+                    feature.FeatureId = featureDto.FeatureId;
+                    feature.SubFeatureName = featureDto.SubFeatureName;
+                    feature.SubFeatureDesc = featureDto.SubFeatureDesc;
+                    feature.StoryGroomed = featureDto.StoryGroomed;
+                    feature.DevelopmentComplete = featureDto.DevelopmentComplete;
+                    feature.UpdatedDate = DateTime.Now;
+                    db.ChatSubFeatureList.Add(feature);
+                }
+                else if (operation == "u")
+                {
+                    feature = db.ChatSubFeatureList.Where(x => x.SubFeatureId == featureDto.SubFeatureId).FirstOrDefault();
+                    feature.FeatureId = featureDto.FeatureId;
+                    feature.SubFeatureName = featureDto.SubFeatureName;
+                    feature.SubFeatureDesc = featureDto.SubFeatureDesc;
+                    feature.StoryGroomed = featureDto.StoryGroomed;
+                    feature.DevelopmentComplete = featureDto.DevelopmentComplete;
+                    feature.UpdatedDate = DateTime.Now;
+                }
+                else
+                {
+                    feature = db.ChatSubFeatureList.Where(x => x.SubFeatureId == featureDto.SubFeatureId).FirstOrDefault();
+                    db.ChatSubFeatureList.Attach(feature);
+                    db.ChatSubFeatureList.Remove(feature);
+                }
                 changed = true;
                 db.SaveChanges();
                 return Json(changed, JsonRequestBehavior.AllowGet);
