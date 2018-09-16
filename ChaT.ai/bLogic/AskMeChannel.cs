@@ -14,6 +14,7 @@ namespace ChaT.ai.bLogic
         private ChatDatabaseModel db;
         private AskMeHiBye hiBye;
         private AskMeSuggestionMatch suggestionMatch;
+        private AskMeCommon common;
         private AskMeContentManager contentManager = new AskMeContentManager();
         KeyValuePair<int, string> finalResponse = new KeyValuePair<int, string>();
         public AskMeChannel(string message, int node)
@@ -23,6 +24,7 @@ namespace ChaT.ai.bLogic
             db = new ChatDatabaseModel();
             hiBye = new AskMeHiBye(Message, Node);
             suggestionMatch = new AskMeSuggestionMatch(Message, Node);
+            common = new AskMeCommon(Message, Node);
         }
 
         //ChaT Bot Reponse Main Entry
@@ -143,7 +145,12 @@ namespace ChaT.ai.bLogic
                     finalResponse = ChatInitializer();
                 }
             }
-            
+
+            if (finalResponse.Value == contentManager.NoIntentMatchedResponse)
+            {
+                common.LogFailureResponse();
+            }
+
             return finalResponse;
         }
 
@@ -186,84 +193,46 @@ namespace ChaT.ai.bLogic
             if (vocabList.Count == 0)
                 return new KeyValuePair<int, string>(Node, responseMessage);
 
-            //foreach (string vocab in vocabList)
-            //{
-            //    var hasIntent = intentList.Where(x => x.ParentId == Node).Where(x => vocab.Contains(x.IntentName) || x.IntentName.Contains(vocab));
-            //    if (hasIntent.Any())
-            //    {
-            //        Dictionary<int, string> intentDict = hasIntent.Select(t => new { t.ChatIntentId, t.IntentName }).ToList().ToDictionary(x => x.ChatIntentId, y => y.IntentName);
-            //        foreach (KeyValuePair<int, string> intent in intentDict)
-            //        {
-            //            KeyValuePair<int, string> childIntent = GetChildIntent(intent.Key, vocabList);
-            //            if (string.IsNullOrEmpty(childIntent.Value))
-            //            {
-            //                responseMessage = intentList.Where(x => x.ChatIntentId == intent.Key).Select(y => y.Response).FirstOrDefault();
-            //                Node = intent.Key;
-            //            }
-            //            else
-            //            {
-            //                responseMessage = childIntent.Value;
-            //                Node = childIntent.Key;
-            //            }
-            //            return new KeyValuePair<int, string>(Node, responseMessage);
-            //        }
-            //    }
-            //}
-            //Dictionary<int, string> intentNameDict = intentList.Select(t => new { t.ChatIntentId, t.IntentName }).ToList().ToDictionary(x => x.ChatIntentId, y => y.IntentName);
-            //LevenshteinDistance dist = new LevenshteinDistance();
-            //foreach (string vocab in vocabList)
-            //{
-            //    foreach (KeyValuePair<int, string> intent in intentNameDict)
-            //    {
-            //        if (dist.Compute(vocab, intent.Value) < 4)
-            //        {
-            //            KeyValuePair<int, string> childIntent = GetChildIntent(intent.Key, vocabList);
-            //            if (string.IsNullOrEmpty(childIntent.Value))
-            //            {
-            //                responseMessage = intentList.Where(x => x.ChatIntentId == intent.Key).Select(y => y.Response).FirstOrDefault();
-            //                Node = intent.Key;
-            //            }
-            //            else
-            //            {
-            //                responseMessage = childIntent.Value;
-            //                Node = childIntent.Key;
-            //            }
-            //            return new KeyValuePair<int, string>(Node, responseMessage);
-            //        }
-            //    }
-            //}
 
             SimilarityCalculator similarityCalculator = new SimilarityCalculator();
             List<ChatIntentQuestion> questionList = db.ChatIntentQuestion.ToList();
-            Dictionary<string, int> questions = questionList.Select(t => new { t.QuestionDesc, t.ChatIntentId }).ToList().ToDictionary(x => x.QuestionDesc, y => y.ChatIntentId);
-            KeyValuePair<string, int> questionHighestMatch = new KeyValuePair<string, int>();
-            double compareHigh = 0;
-            foreach (KeyValuePair<string, int> question in questions)
+            Dictionary<int, double> scoreDict = new Dictionary<int, double>();
+            foreach (ChatIntentQuestion question in questionList)
             {
-                double compare = similarityCalculator.CompareString(Message, question.Key, 1);
-                if (compareHigh < compare)
+                double compare = similarityCalculator.CompareString(Message, question.QuestionDesc, 1);
+                KeyValuePair<int, double> score = new KeyValuePair<int, double>(question.ChatIntentId, compare);
+                if (scoreDict.ContainsKey(score.Key))
                 {
-                    compareHigh = compare;
-                    questionHighestMatch = question;
+                    if (scoreDict[score.Key] < compare)
+                    {
+                        scoreDict[score.Key] = compare;
+                    }
+                }
+                else
+                {
+                    scoreDict.Add(score.Key, score.Value);
                 }
             }
 
-            if (compareHigh > 0)
+            if (scoreDict.Where(x => x.Value > 0.45).Any())
             {
-                string response = db.ChatIntent.Where(x => x.ChatIntentId == questionHighestMatch.Value).Select(y => y.Response).FirstOrDefault();
-                //KeyValuePair<int, string> childIntent = GetChildIntent(questionHighestMatch.Value, vocabList);
-                //if (string.IsNullOrEmpty(childIntent.Value))
-                //{
-                //    responseMessage = response;
-                //    Node = questionHighestMatch.Value;
-                //}
-                //else
-                //{
-                //    responseMessage = childIntent.Value;
-                //    Node = childIntent.Key;
-                //}
+                int maxScoreChatIntentId = scoreDict.OrderByDescending(x => x.Value).Select(y => y.Key).FirstOrDefault();
+                string response = db.ChatIntent.Where(x => x.ChatIntentId == maxScoreChatIntentId).Select(y => y.Response).FirstOrDefault();
                 responseMessage = response;
-                Node = questionHighestMatch.Value;
+                Node = maxScoreChatIntentId;
+                return new KeyValuePair<int, string>(Node, responseMessage);
+            }
+            else if (scoreDict.Where(x => x.Value >= 0.23).Any())
+            {
+                List<int> possibeMatch = scoreDict.OrderByDescending(x => x.Value).Where(x => x.Value >= 0.23).Select(y => y.Key).ToList();
+                responseMessage = contentManager.IntentPossibleMatchedResponse;
+                foreach (int match in possibeMatch)
+                {
+                    responseMessage = responseMessage + "<br>";
+                    string suggestion = db.ChatIntent.Where(x => x.ChatIntentId == match).Select(y => y.IntentDescription).FirstOrDefault();
+                    responseMessage = responseMessage + suggestion;
+                }
+                responseMessage = responseMessage + "<br>" + contentManager.IntentSuggestionResponse;
                 return new KeyValuePair<int, string>(Node, responseMessage);
             }
 
@@ -309,7 +278,7 @@ namespace ChaT.ai.bLogic
         private string GetEntityforIntent(int chatIntentId, List<string> vocabList)
         {
             string entity = string.Empty;
-            List<ChatEntity> entityList = db.ChatEntity.Where(z => z.ChatIntentId == chatIntentId.ToString()).ToList();
+            List<ChatEntity> entityList = new List<ChatEntity>(); // db.ChatEntity.Where(z => z.ChatIntentId == chatIntentId.ToString()).ToList();
 
             foreach (string vocab in vocabList)
             {

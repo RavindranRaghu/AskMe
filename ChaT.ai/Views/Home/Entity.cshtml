@@ -1,0 +1,239 @@
+﻿@model IEnumerable<ChaT.ai.Dto.EntitytDto>
+
+@{
+    ViewBag.Title = "Entity";
+    List<SelectListItem> intents = ViewBag.intents as List<SelectListItem>;
+}
+
+<style>
+    .form-control {
+        margin-bottom: 10px;
+    }
+
+    .page-subheader {
+        font-size: x-large;
+    }
+</style>
+
+<div style="padding-top:23px;">
+    <span class="page-subheader">Entity</span>
+    <button type="button" class="btn btn-link newProject"
+            data-toggle="modal"
+            data-target="#projectModal">
+        Create
+    </button>
+</div>
+<div>
+    @Html.Partial("_AdminPartial")
+</div>
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.EntityName)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.EntityDescription)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.ChatIntentId)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.UpdatedDate)
+        </th>
+        <th>
+            Edit
+        </th>
+        <th>
+            Delete
+        </th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.EntityName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.EntityDescription)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ChatIntentId)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.UpdatedDate)
+            </td>
+            <td>
+                <button type="button" class="btn btn-default glyphicon glyphicon-edit openExistingProject"
+                        data-toggle="modal" data-id=@item.ChatEntityId data-name="@item.EntityName" data-desc="@item.EntityDescription" data-intentid="@item.ChatIntentId" data-intentname="@item.ChatIntentName" data-lastupdated="@item.UpdatedDate" data-target="#projectModal"></button>
+            </td>
+            <td>
+                <button type="button" class="btn btn-default glyphicon glyphicon-trash deleteExistingProject"
+                        data-toggle="modal" data-id=@item.ChatEntityId data-name="@item.EntityName" data-desc="@item.EntityDescription" data-intentid="@item.ChatIntentId" data-intentname="@item.ChatIntentName" data-lastupdated="@item.UpdatedDate" data-target="#projectModal"></button>
+            </td>
+        </tr>
+    }
+
+</table>
+
+
+
+<div id="projectModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="appHeading">Entity</h4>
+                <div><span style="color:dodgerblue" id="lastUpdated"></span></div>
+            </div>
+
+            <div class="modal-body">
+                <input type="hidden" id="entityId" />
+                <input type="hidden" id="intentId" />
+                <input type="hidden" id="operation" />
+                <input type="hidden" id="table-reload" value="n" />
+
+                <div class="row">
+                    <div class="col-sm-2">Entity Name</div>
+                    <div class="col-sm-10"><input type="text" class="form-control" id="entityName" /></div>
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-2">Entity Desc</div>
+                    <div class="col-sm-10"><input type="text" class="form-control" id="entityDesc" /></div>
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-2">Intent</div>
+                    <div class="col-sm-10">
+                        @*<input type="text" class="form-control" id="intentName" />*@
+                        <select class="form-control" name="intentName" id="intentName">
+                            @{
+                                foreach (SelectListItem intent in intents)
+                                {
+                                    <option value="@intent.Value">@intent.Text</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="saveProject" type="button" class="btn btn-default">Save</button>
+                <button id="closeProject" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+        $(function () {
+
+            $(document).ready(function () {
+                //$('#questionTable').DataTable({
+                //    "pageLength": 50
+               // });
+            });
+
+            //open Modal for existing project
+
+            $(document).on('click', '.openExistingProject', function () {
+                $('#saveProject').html('Update');
+                $('#saveProject').removeAttr('disabled');
+                $('#entityId').val($(this).data('id'));
+                $('#intentId').val($(this).data('intentid'));
+                $('#intentName').val($(this).data('intentid'));
+                $('#intentName option:selected').text($(this).data('intentname'));
+                $('#entityName').val($(this).data('name'));
+                $('#entityDesc').val($(this).data('desc'));
+                $('#lastUpdated').html('Last Updated: ' + $(this).data('lastupdated'));
+                $('#operation').val("u");
+            });
+
+            //open Modal for delete
+
+            $(document).on('click', '.deleteExistingProject', function () {
+                $('#saveProject').html('Delete');
+                $('#saveProject').removeAttr('disabled');
+                $('#entityId').val($(this).data('id'));
+                $('#intentId').val($(this).data('intentid'));
+                $('#intentName').val($(this).data('intentid'));
+                $('#intentName option:selected').text($(this).data('intentname'));
+                $('#entityName').val($(this).data('name'));
+                $('#entityDesc').val($(this).data('desc'));
+                $('#lastUpdated').html('Last Updated: ' + $(this).data('lastupdated'));
+                $('#operation').val("d");
+            });
+
+
+            //open Modal for new project
+
+            $(document).on('click', '.newProject', function () {
+                $('#saveProject').html('Add');
+                $('#saveProject').removeAttr('disabled');
+                $('#entityId').val(0);
+                $('#lastUpdated').html('Adding New Entity');
+                $('#operation').val("a");
+            });
+
+
+
+            // save project
+
+            $(document).on('click', '#saveProject', function () {
+                var entityId = $('#entityId').val();
+                var entityName = $('#entityName').val();
+                var entityDesc = $('#entityDesc').val();
+                var intendId = $('#intentName').val(); // $('#intendId').val();
+                var intendName = $('#intentName option:selected').text();
+                var operation = $('#operation').val();
+                var updatedDate = new Date;
+                debugger;
+                var project = { ChatEntityId: entityId, EntityName: entityName, EntityDescription: entityDesc, ChatIntentId: intendId, ChatIntentName: intendName, UpdatedDate: updatedDate };
+                var finalProject = { entity: project, operation: operation };
+                $.ajax({
+                    type: "POST",
+                    url: "/home/EntityUpdate/",
+                    data: JSON.stringify(finalProject),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (result) {
+                        if (result == true) {
+                            $('#lastUpdated').html('Updated Successfully <span style="color:green" class="glyphicon glyphicon-ok-circle"> </span>');
+                            $('#table-reload').val("y");
+                            $('#saveProject').attr('disabled', 'disabled');
+                        }
+                        else {
+                            $('#lastUpdated').html('Updated Failed <span style="color:red" class="glyphicon glyphicon-remove-circle"> </span>');
+                            $('#table-reload').val("n");
+                            $('#saveProject').removeAttr('disabled');
+                        }
+                    },
+                    error: function (errorMsg) {
+                        $('#lastUpdated').html('<span class="alert alert-warning">' + errorMsg.statusText + '</span> ');
+                    }
+                });
+            });
+
+
+
+            //Close Modal
+
+            $(document).on('click', '#closeProject', function () {
+                if ($('#table-reload').val() == "y") {
+                    location.reload();
+                }
+            });
+
+            $('#intentName').change(function () {
+                $('#intentId').val($(this).val());
+            });
+
+        });
+
+
+
+</script>

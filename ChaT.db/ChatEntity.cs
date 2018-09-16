@@ -18,8 +18,7 @@ namespace ChaT.db
         [StringLength(1000)]
         public string EntityDescription { get; set; }
 
-        [StringLength(1000)]
-        public string ChatIntentId { get; set; }
+        public int ChatIntentId { get; set; }
 
         public DateTime UpdatedDate { get; set; }
     }

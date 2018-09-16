@@ -16,6 +16,7 @@ namespace ChaT.db
         public virtual DbSet<ChatIntent> ChatIntent { get; set; }
         public virtual DbSet<ChatIntentQuestion> ChatIntentQuestion { get; set; }
         public virtual DbSet<ChatParameter> ChatParameter { get; set; }
+        public virtual DbSet<ChatFailureResponse> ChatFailureResponse { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {

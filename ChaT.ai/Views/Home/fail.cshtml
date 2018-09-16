@@ -1,0 +1,85 @@
+﻿@model IEnumerable<ChaT.db.ChatFailureResponse>
+
+@{
+    ViewBag.Title = "fail";
+}
+
+<div style="padding-top:23px;">
+    <span class="page-subheader">Failure Response</span>
+</div>
+<div>
+    @Html.Partial("_AdminPartial")
+</div>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.QuestionByUser)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.ParentId)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Reviewed)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.UpdatedDate)
+        </th>
+        <th>Pending</th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.QuestionByUser)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ParentId)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Reviewed)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.UpdatedDate)
+            </td>
+            <td>
+                @{ if (item.Reviewed)
+                    {
+                        <span class="glyphicon glyphicon-ok"></span>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-warning conductReview" data-id="@item.DefectId">
+                            pending
+                        </button>
+                    }
+                }
+            </td>
+        </tr>
+    }
+
+</table>
+
+
+<script>
+
+
+    $(document).on('click', '.conductReview', function () {
+        var questionId = $(this).data('id');
+        var finalProject = { questionId: questionId };
+        $.ajax({
+            type: "POST",
+            url: "/home/FailReviewUpdate/",
+            data: JSON.stringify(finalProject),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (result) {
+                location.reload();
+            },
+            error: function (errorMsg) {
+
+            }
+        });
+    });
+
+</script>

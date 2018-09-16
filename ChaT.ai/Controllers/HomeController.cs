@@ -155,6 +155,39 @@ namespace ChaT.ai.Controllers
             return View(db.ChatParameter.ToList());
         }
 
+        public ActionResult Entity()
+        {
+            List<EntitytDto> entity = (from ent in db.ChatEntity
+                                       join intent in db.ChatIntent on ent.ChatIntentId equals intent.ChatIntentId
+                                       select new EntitytDto {
+                                           ChatEntityId = ent.ChatEntityId,
+                                           EntityName = ent.EntityName,
+                                           EntityDescription = ent.EntityDescription,
+                                           ChatIntentId = ent.ChatIntentId,
+                                           ChatIntentName = intent.IntentName,
+                                           UpdatedDate =  ent.UpdatedDate
+                                       }).ToList();
+            List<SelectListItem> intents = db.ChatIntent.ToList().Select(u => new SelectListItem
+            {
+                Text = u.IntentName,
+                Value = u.ChatIntentId.ToString()
+            }).ToList();
+
+            ViewBag.intents = intents;
+
+            return View(entity);
+        }
+
+        public ActionResult fail()
+        {
+            return View(db.ChatFailureResponse.ToList());
+        }
+
+        public ActionResult Admin()
+        {
+            return View();
+        }
+
         public JsonResult QuestionUpdate(AskOperation askOperation)
         {
             AskDto ask = askOperation.ask;
@@ -293,10 +326,76 @@ namespace ChaT.ai.Controllers
 
         }
 
+        public JsonResult EntityUpdate(EntityOperation entOperation)
+        {
+            EntitytDto entitydto = entOperation.entity;
+            string operation = entOperation.Operation;
+            ChatEntity entity = new ChatEntity();
+            bool changed = false;
+            entity.UpdatedDate = DateTime.UtcNow;
+            try
+            {
+                if (operation == "a")
+                {
+                    entity.EntityName = entitydto.EntityName ;
+                    entity.EntityDescription = entitydto.EntityDescription;
+                    entity.ChatIntentId = entitydto.ChatIntentId;
+                    entity.UpdatedDate = DateTime.Now;
+                    db.ChatEntity.Add(entity);
+                }
+                else if (operation == "u")
+                {
+                    entity = db.ChatEntity.Where(x => x.ChatEntityId == entitydto.ChatEntityId).FirstOrDefault();
+                    entity.EntityName = entitydto.EntityName;
+                    entity.EntityDescription = entitydto.EntityDescription;
+                    entity.ChatIntentId = entitydto.ChatIntentId;
+                    entity.UpdatedDate = DateTime.Now;
+                }
+                else
+                {
+                    entity = db.ChatEntity.Where(x => x.ChatEntityId == entitydto.ChatEntityId).FirstOrDefault();
+                    db.ChatEntity.Attach(entity);
+                    db.ChatEntity.Remove(entity);
+                }
+                changed = true;
+                db.SaveChanges();
+                return Json(changed, JsonRequestBehavior.AllowGet);
+            }
+
+            catch (Exception e)
+
+            {
+                Console.WriteLine(e.Message);
+                return Json(changed, JsonRequestBehavior.AllowGet);
+            }
+
+        }
+
+        public JsonResult FailReviewUpdate(int questionId)
+        {
+            bool changed = true;
+            try
+            {
+                ChatFailureResponse fail = db.ChatFailureResponse.Where(x => x.DefectId == questionId).FirstOrDefault();
+                fail.Reviewed = true;
+                fail.UpdatedDate = DateTime.Now;
+                changed = true;
+                db.SaveChanges();
+                return Json(changed, JsonRequestBehavior.AllowGet);
+            }
+
+            catch (Exception e)
+
+            {
+                Console.WriteLine(e.Message);
+                return Json(changed, JsonRequestBehavior.AllowGet);
+            }
+
+        }
+
         [HttpPost]
         public ActionResult UploadAudio()
         {
-            string content = "";
             string text = string.Empty;
             var file = Request.Files[0];
             string requestUri = "https://speech.platform.bing.com/speech/recognition/conversation/cognitiveservices/v1?language=en-US&format=detailed";
@@ -355,6 +454,30 @@ namespace ChaT.ai.Controllers
                 finalresponse = speechResponse.nBest[0].Display;
             else
                 finalresponse = "Sorry i did not understand";
+
+            if (System.IO.File.Exists(filepath2))
+            {
+                System.IO.File.Delete(filepath2);
+            }
+
+            return Json(finalresponse, JsonRequestBehavior.AllowGet);
+        }
+
+
+        [HttpPost]
+        public ActionResult UploadAudio1()
+        {
+            string finalresponse = string.Empty;
+            var file = Request.Files[0];
+
+            // Send an audio file by 1024 byte chunks
+            Guid guid = Guid.NewGuid();
+            string filepath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Content\\sound\\myRecording01.wav");
+            string filepath2 = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Content\\sound\\" + guid.ToString() + ".wav");
+            file.SaveAs(filepath2);
+            AskMeSpeech speech = new AskMeSpeech();
+            //finalresponse = speech.SpeechToTextGoogle(filepath2);
+            //speech.Voice2Text(filepath2);
 
             if (System.IO.File.Exists(filepath2))
             {

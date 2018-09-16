@@ -37,6 +37,9 @@
             Create
         </button>
     </p>
+    <div>
+        @Html.Partial("_AdminPartial")
+    </div>
     <table class="table" id="questionTable">
         <thead>
             <tr>
@@ -129,9 +132,9 @@
         $(function () {
 
             $(document).ready(function () {
-                $('#questionTable').DataTable({
-                    "pageLength": 50
-                });
+                //$('#questionTable').DataTable({
+                //    "pageLength": 50
+               // });
             });
 
             //open Modal for existing project

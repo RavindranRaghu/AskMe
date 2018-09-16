@@ -14,13 +14,16 @@
     }
 </style>
 
-<div style="padding:23px;">
+<div style="padding-top:23px;">
     <span class="page-subheader">Intent</span>
     <button type="button" class="btn btn-link newProject"
             data-toggle="modal"
             data-target="#projectModal">
         Create
     </button>
+</div>
+<div>
+    @Html.Partial("_AdminPartial")
 </div>
 <table class="table">
     <tr>
@@ -139,9 +142,9 @@
         $(function () {
 
             $(document).ready(function () {
-                $('#questionTable').DataTable({
-                    "pageLength": 50
-                });
+                //$('#questionTable').DataTable({
+                //    "pageLength": 50
+                //});
             });
 
             //open Modal for existing project
