@@ -23,8 +23,8 @@ $(function () {
         else {
             $('#subfeature-dev option:selected').text("No");
         }
-        $('#subestimated').val($(this).data('subestimated'));
-        $('#subactual').val($(this).data('subactual'));
+        $('#subestimated').val($(this).data('estimated'));
+        $('#subactual').val($(this).data('actual'));
         $('#lastUpdated').html('Last Updated: ' + $(this).data('lastupdated'));
         $('#operation').val("u");
     });
@@ -53,8 +53,8 @@ $(function () {
         else {
             $('#subfeature-dev option:selected').text("No");
         }
-        $('#subestimated').val($(this).data('subestimated'));
-        $('#subactual').val($(this).data('subactual'));
+        $('#subestimated').val($(this).data('estimated'));
+        $('#subactual').val($(this).data('actual'));
         $('#lastUpdated').html('Last Updated: ' + $(this).data('lastupdated'));
         $('#operation').val("d");
     });

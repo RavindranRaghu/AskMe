@@ -459,6 +459,8 @@ namespace ChaT.ai.Controllers
                     feature.SubFeatureDesc = featureDto.SubFeatureDesc;
                     feature.StoryGroomed = featureDto.StoryGroomed;
                     feature.DevelopmentComplete = featureDto.DevelopmentComplete;
+                    feature.EffortEstimated = featureDto.EffortEstimated;
+                    feature.EffortActual = featureDto.EffortActual;
                     feature.UpdatedDate = DateTime.Now;
                     db.ChatSubFeatureList.Add(feature);
                 }
@@ -470,6 +472,8 @@ namespace ChaT.ai.Controllers
                     feature.SubFeatureDesc = featureDto.SubFeatureDesc;
                     feature.StoryGroomed = featureDto.StoryGroomed;
                     feature.DevelopmentComplete = featureDto.DevelopmentComplete;
+                    feature.EffortEstimated = featureDto.EffortEstimated;
+                    feature.EffortActual = featureDto.EffortActual;
                     feature.UpdatedDate = DateTime.Now;
                 }
                 else

@@ -12,6 +12,9 @@
     }
 </style>
 <div style="padding-top:23px;">
+    @Html.Partial("_AdminPartial")
+</div>
+<div style="padding-top:15px;">
     <span class="page-subheader">Feature</span>
     <button type="button" class="btn btn-link newProject"
             data-toggle="modal"
@@ -19,49 +22,46 @@
         Add Feature
     </button>
 </div>
-<div style="padding-top:23px;">
-    @Html.Partial("_AdminPartial")
-</div>
-
 <table class="table" id="questionTable">
     <thead>
-        <tr>
+        <tr style="font-size:medium;background-color:whitesmoke;text-align:center;">
             <th>Feature Name</th>
             <th>Feature Description</th>
             <th>Story Groomed</th>
             <th>Dev Status</th>
-            <th>Estimated Hrs</th>
+            <th>Estd. Hrs</th>
             <th>Actual Hrs</th>
-            <th>Sub Feature</th>
+            <th>Add</th>
             <th>Edit</th>
             <th>Delete</th>
         </tr>
     </thead>
     <tbody>
-        @{
+        @{ int itemCounter = 0;
             foreach (var item in Model.feature)
             {
                 int story = (item.StoryGroomed) ? 1 : 0;
                 int dev = (item.DevelopmentComplete) ? 1 : 0;
-                <tr>
-                    <td>@item.FeatureName</td>
+                itemCounter = itemCounter + 1;
+                <tr style="font-weight:bold;font-size:medium">
+                    <td>@itemCounter.ToString().@item.FeatureName</td>
                     <td>@item.FeatureDesc</td>
                     @{ if (item.StoryGroomed)
                         {
-                            <td><span class="glyphicon glyphicon-ok" style="color:green;font-size:large"></span></td>
+                            <td style="text-align:center;"><span class="glyphicon glyphicon-ok" style="color:green;font-size:large"></span></td>
                         }
                         else
                         {
-                            <td><span class="glyphicon glyphicon-minus"></span></td>
+                            <td style="text-align:center;"><span class="glyphicon glyphicon-minus"></span></td>
                         }
                     }
                     @{ if (item.DevelopmentComplete)
                         {
-                            <td><span class="glyphicon glyphicon-ok-circle"></span></td>
+                            <td style="text-align:center;"><span class="glyphicon glyphicon-ok" style="color:green;font-size:large"></span></td>
                         }
                         else
                         {
-                            <td><span class="glyphicon glyphicon-minus"></span></td>
+                            <td style="text-align:center;"><span class="glyphicon glyphicon-minus"></span></td>
                         }
                     }
                     <td></td>
@@ -70,8 +70,7 @@
                         <button type="button" class="btn btn-default glyphicon glyphicon-plus newSubFeature"
                                 data-toggle="modal"
                                 data-featureid="@item.FeatureId"
-                                data-target="#subFeatureModal">
-                        </button>
+                                data-target="#subFeatureModal"></button>
                     </td>
                     <td>
                         <button type="button" class="btn btn-default glyphicon glyphicon-edit openExistingProject"
@@ -102,13 +101,30 @@
                     int subdev = (subitem.DevelopmentComplete) ? 1 : 0;
                     if (subitem.FeatureId == item.FeatureId)
                     {
-                        <tr>
-                            <td>@subitem.SubFeatureName</td>
+                        <tr style="font-style:italic;font-size:medium">
+                            <td><span class="glyphicon glyphicon-circle-arrow-right" style="color:green; padding-right:5px;"></span>@subitem.SubFeatureName</td>
                             <td>@subitem.SubFeatureDesc</td>
-                            <td>@subitem.StoryGroomed</td>
-                            <td>@subitem.DevelopmentComplete</td>
+                            @{ if (subitem.StoryGroomed)
+                                {
+                                    <td style="text-align:center;"><span class="glyphicon glyphicon-ok" style="color:green;font-size:small"></span></td>
+                                }
+                                else
+                                {
+                                    <td style="text-align:center;"><span class="glyphicon glyphicon-minus"></span></td>
+                                }
+                            }
+                            @{ if (subitem.DevelopmentComplete)
+                                {
+                                    <td style="text-align:center;"><span class="glyphicon glyphicon-ok" style="color:green;font-size:small"></span></td>
+                                }
+                                else
+                                {
+                                    <td style="text-align:center;"><span class="glyphicon glyphicon-minus"></span></td>
+                                }
+                            }
                             <td>@subitem.EffortEstimated</td>
                             <td>@subitem.EffortActual</td>
+                            <td></td>
                             <td>
                                 <button type="button" class="btn btn-default glyphicon glyphicon-edit openExistingSubFeature"
                                         data-toggle="modal"
