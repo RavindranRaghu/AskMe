@@ -180,6 +180,13 @@ namespace ChaT.ai.Controllers
 
         public ActionResult fail()
         {
+            List<SelectListItem> intentNames = db.ChatIntent.ToList().Select(u => new SelectListItem
+            {
+                Text = u.IntentName,
+                Value = u.ChatIntentId.ToString()
+            }).ToList();
+
+            ViewBag.intentNames = intentNames;
             return View(db.ChatFailureResponse.ToList());
         }
 
@@ -374,7 +381,7 @@ namespace ChaT.ai.Controllers
 
         }
 
-        public JsonResult FailReviewUpdate(int questionId)
+        public JsonResult FailReviewUpdate(int questionId, string questionName,int ChatIntentId)
         {
             bool changed = true;
             try
@@ -383,6 +390,12 @@ namespace ChaT.ai.Controllers
                 fail.Reviewed = true;
                 fail.UpdatedDate = DateTime.Now;
                 changed = true;
+
+                ChatIntentQuestion question = new ChatIntentQuestion();
+                question.QuestionDesc = questionName;
+                question.ChatIntentId = ChatIntentId;
+                db.ChatIntentQuestion.Add(question);
+
                 db.SaveChanges();
                 return Json(changed, JsonRequestBehavior.AllowGet);
             }

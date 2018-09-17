@@ -9,12 +9,16 @@
     .form-control {
         margin-bottom: 10px;
     }
+
     .page-subheader {
         font-size: x-large;
     }
 </style>
 
 <div style="padding-top:23px;">
+    @Html.Partial("_AdminPartial")
+</div>
+<div style="padding-top:15px;">
     <span class="page-subheader">Intent</span>
     <button type="button" class="btn btn-link newProject"
             data-toggle="modal"
@@ -22,9 +26,7 @@
         Create
     </button>
 </div>
-<div>
-    @Html.Partial("_AdminPartial")
-</div>
+
 <table class="table">
     <tr>
         <th>
@@ -42,43 +44,41 @@
 
     @foreach (var item in Model)
     {
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.IntentName)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.IntentDescription)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.ParentName)
-        </td>
-        <td>
-            <button type="button" class="btn btn-default glyphicon glyphicon-edit openExistingProject"
-                    data-toggle="modal" 
-                    data-parentid="@item.ParentId" 
-                    data-parentname="@item.ParentName"
-                    data-response="@item.Response" 
-                    data-intentid="@item.ChatIntentId" 
-                    data-intentname="@item.IntentName" 
-                    data-intentdesc="@item.IntentDescription" 
-                    data-lastupdated="@item.UpdatedDate" 
-                    data-target="#projectModal">
-            </button>
-        </td>
-        <td>
-            <button type="button" class="btn btn-default glyphicon glyphicon-trash deleteExistingProject"
-                    data-toggle="modal" 
-                    data-parentid="@item.ParentId"
-                    data-parentname="@item.ParentName"
-                    data-response="@item.Response" 
-                    data-intentid="@item.ChatIntentId" 
-                    data-intentname="@item.IntentName" 
-                    data-intentdesc="@item.IntentDescription" 
-                    data-lastupdated="@item.UpdatedDate"
-                    data-target="#projectModal">
-            </button>
-        </td>
-    </tr>
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.IntentName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.IntentDescription)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ParentName)
+            </td>
+            <td>
+                <button type="button" class="btn btn-default glyphicon glyphicon-edit openExistingProject"
+                        data-toggle="modal"
+                        data-parentid="@item.ParentId"
+                        data-parentname="@item.ParentName"
+                        data-response="@item.Response"
+                        data-intentid="@item.ChatIntentId"
+                        data-intentname="@item.IntentName"
+                        data-intentdesc="@item.IntentDescription"
+                        data-lastupdated="@item.UpdatedDate"
+                        data-target="#projectModal"></button>
+            </td>
+            <td>
+                <button type="button" class="btn btn-default glyphicon glyphicon-trash deleteExistingProject"
+                        data-toggle="modal"
+                        data-parentid="@item.ParentId"
+                        data-parentname="@item.ParentName"
+                        data-response="@item.Response"
+                        data-intentid="@item.ChatIntentId"
+                        data-intentname="@item.IntentName"
+                        data-intentdesc="@item.IntentDescription"
+                        data-lastupdated="@item.UpdatedDate"
+                        data-target="#projectModal"></button>
+            </td>
+        </tr>
     }
 
 </table>
@@ -139,115 +139,115 @@
 
 <script>
 
-        $(function () {
+    $(function () {
 
-            $(document).ready(function () {
-                //$('#questionTable').DataTable({
-                //    "pageLength": 50
-                //});
-            });
+        $(document).ready(function () {
+            //$('#questionTable').DataTable({
+            //    "pageLength": 50
+            //});
+        });
 
-            //open Modal for existing project
+        //open Modal for existing project
 
-            $(document).on('click', '.openExistingProject', function () {
-                $('#saveProject').html('Update');
-                $('#saveProject').removeAttr('disabled');
-                $('#questionId').val($(this).data('id'));
-                $('#intent-id').val($(this).data('intentid'));
-                $('#intent-name').val($(this).data('intentname'));
-                $('#intent-desc').val($(this).data('intentdesc'));
-                $('#response').val($(this).data('response'));
-                $('#parent option:selected').text($(this).data('parentname'));
-                console.log($(this).data('parentname'));
-                $('#parent').val($(this).data('parentid'));
-                $('#parent-id').val($(this).data('parentid'));
-                $('#lastUpdated').html('Last Updated: ' + $(this).data('lastupdated'));
-                $('#operation').val("u");
-            });
+        $(document).on('click', '.openExistingProject', function () {
+            $('#saveProject').html('Update');
+            $('#saveProject').removeAttr('disabled');
+            $('#questionId').val($(this).data('id'));
+            $('#intent-id').val($(this).data('intentid'));
+            $('#intent-name').val($(this).data('intentname'));
+            $('#intent-desc').val($(this).data('intentdesc'));
+            $('#response').val($(this).data('response'));
+            $('#parent option:selected').text($(this).data('parentname'));
+            console.log($(this).data('parentname'));
+            $('#parent').val($(this).data('parentid'));
+            $('#parent-id').val($(this).data('parentid'));
+            $('#lastUpdated').html('Last Updated: ' + $(this).data('lastupdated'));
+            $('#operation').val("u");
+        });
 
-            //open Modal for delete
+        //open Modal for delete
 
-            $(document).on('click', '.deleteExistingProject', function () {
-                $('#saveProject').html('Delete');
-                $('#saveProject').removeAttr('disabled');
-                $('#questionId').val($(this).data('id'));
-                $('#intent-id').val($(this).data('intentid'));
-                $('#intent-name').val($(this).data('intentname'));
-                $('#intent-desc').val($(this).data('intentdesc'));
-                $('#response').val($(this).data('response'));
-                $('#parent option:selected').text($(this).data('parentname'));
-                $('#parent').val($(this).data('parentid'));
-                $('#parent-id').val($(this).data('parentid'));
-                $('#lastUpdated').html('Last Updated: ' + $(this).data('lastupdated'));
-                $('#operation').val("d");
-            });
-
-
-            //open Modal for new project
-
-            $(document).on('click', '.newProject', function () {
-                $('#saveProject').html('Add');
-                $('#saveProject').removeAttr('disabled');
-                $('#intent-id').val(0);
-                $('#lastUpdated').html('Adding New Project');
-                $('#operation').val("a");
-            });
+        $(document).on('click', '.deleteExistingProject', function () {
+            $('#saveProject').html('Delete');
+            $('#saveProject').removeAttr('disabled');
+            $('#questionId').val($(this).data('id'));
+            $('#intent-id').val($(this).data('intentid'));
+            $('#intent-name').val($(this).data('intentname'));
+            $('#intent-desc').val($(this).data('intentdesc'));
+            $('#response').val($(this).data('response'));
+            $('#parent option:selected').text($(this).data('parentname'));
+            $('#parent').val($(this).data('parentid'));
+            $('#parent-id').val($(this).data('parentid'));
+            $('#lastUpdated').html('Last Updated: ' + $(this).data('lastupdated'));
+            $('#operation').val("d");
+        });
 
 
+        //open Modal for new project
 
-            // save project
+        $(document).on('click', '.newProject', function () {
+            $('#saveProject').html('Add');
+            $('#saveProject').removeAttr('disabled');
+            $('#intent-id').val(0);
+            $('#lastUpdated').html('Adding New Project');
+            $('#operation').val("a");
+        });
 
-            $(document).on('click', '#saveProject', function () {
-                var intentId = $('#intent-id').val(); // $('#intendId').val();
-                var intentName = $('#intent-name').val();
-                var intentdesc = $('#intent-desc').val();
-                var questionId = $('#questionId').val();
-                var parentId = $('#parent').val();
-                var parentName = $('#parent option:selected').text();
-                var response = $('#response').val();
-                var operation = $('#operation').val();
-                var updatedDate = new Date;
-                var project = { ChatIntentId: intentId, IntentName: intentName, IntentDescription: intentdesc, ParentId: parentId, ParentName: parentName, Response: response, UpdatedDate: updatedDate };
-                var finalProject = { intent: project, operation: operation };
-                $.ajax({
-                    type: "POST",
-                    url: "/home/IntentUpdate/",
-                    data: JSON.stringify(finalProject),
-                    contentType: "application/json; charset=utf-8",
-                    dataType: "json",
-                    success: function (result) {
-                        if (result == true) {
-                            $('#lastUpdated').html('Updated Successfully <span style="color:green" class="glyphicon glyphicon-ok-circle"> </span>');
-                            $('#table-reload').val("y");
-                            $('#saveProject').attr('disabled', 'disabled');
-                        }
-                        else {
-                            $('#lastUpdated').html('Updated Failed <span style="color:red" class="glyphicon glyphicon-remove-circle"> </span>');
-                            $('#table-reload').val("n");
-                            $('#saveProject').removeAttr('disabled');
-                        }
-                    },
-                    error: function (errorMsg) {
-                        $('#lastUpdated').html('<span class="alert alert-warning">' + errorMsg.statusText + '</span> ');
+
+
+        // save project
+
+        $(document).on('click', '#saveProject', function () {
+            var intentId = $('#intent-id').val(); // $('#intendId').val();
+            var intentName = $('#intent-name').val();
+            var intentdesc = $('#intent-desc').val();
+            var questionId = $('#questionId').val();
+            var parentId = $('#parent').val();
+            var parentName = $('#parent option:selected').text();
+            var response = $('#response').val();
+            var operation = $('#operation').val();
+            var updatedDate = new Date;
+            var project = { ChatIntentId: intentId, IntentName: intentName, IntentDescription: intentdesc, ParentId: parentId, ParentName: parentName, Response: response, UpdatedDate: updatedDate };
+            var finalProject = { intent: project, operation: operation };
+            $.ajax({
+                type: "POST",
+                url: "/home/IntentUpdate/",
+                data: JSON.stringify(finalProject),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (result) {
+                    if (result == true) {
+                        $('#lastUpdated').html('Updated Successfully <span style="color:green" class="glyphicon glyphicon-ok-circle"> </span>');
+                        $('#table-reload').val("y");
+                        $('#saveProject').attr('disabled', 'disabled');
                     }
-                });
-            });
-
-
-
-            //Close Modal
-
-            $(document).on('click', '#closeProject', function () {
-                if ($('#table-reload').val() == "y") {
-                    location.reload();
+                    else {
+                        $('#lastUpdated').html('Updated Failed <span style="color:red" class="glyphicon glyphicon-remove-circle"> </span>');
+                        $('#table-reload').val("n");
+                        $('#saveProject').removeAttr('disabled');
+                    }
+                },
+                error: function (errorMsg) {
+                    $('#lastUpdated').html('<span class="alert alert-warning">' + errorMsg.statusText + '</span> ');
                 }
             });
-
-            $('#parent').change(function () {
-               $('#parent-id').val($(this).val());
-            });
-
         });
+
+
+
+        //Close Modal
+
+        $(document).on('click', '#closeProject', function () {
+            if ($('#table-reload').val() == "y") {
+                location.reload();
+            }
+        });
+
+        $('#parent').change(function () {
+            $('#parent-id').val($(this).val());
+        });
+
+    });
 
 
 

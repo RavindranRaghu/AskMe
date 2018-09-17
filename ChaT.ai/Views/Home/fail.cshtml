@@ -2,13 +2,22 @@
 
 @{
     ViewBag.Title = "fail";
+    List<SelectListItem> intentNames = ViewBag.intentNames as List<SelectListItem>;
 }
+<style>
+    .form-control {
+        margin-bottom: 10px;
+    }
 
+    .page-subheader {
+        font-size: x-large;
+    }
+</style>
 <div style="padding-top:23px;">
-    <span class="page-subheader">Failure Response</span>
-</div>
-<div>
     @Html.Partial("_AdminPartial")
+</div>
+<div style="padding-top:15px;">
+    <span class="page-subheader">Failure Response</span>
 </div>
 <table class="table">
     <tr>
@@ -49,7 +58,9 @@
                     }
                     else
                     {
-                        <button type="button" class="btn btn-warning conductReview" data-id="@item.DefectId">
+                        <button type="button" class="btn btn-warning conductReview"
+                                data-id="@item.DefectId" data-question="@item.QuestionByUser" data-toggle="modal"
+                                data-target="#projectModal">
                             pending
                         </button>
                     }
@@ -61,12 +72,63 @@
 </table>
 
 
+<div id="projectModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="appHeading">Review Intent</h4>
+                <div><span style="color:dodgerblue" id="lastUpdated"></span></div>
+            </div>
+
+            <div class="modal-body">
+                <input type="hidden" id="question-id" />
+                <input type="hidden" id="intent-id" />
+                <input type="hidden" id="table-reload" value="n" />
+
+                <div class="row">
+                    <div class="col-sm-2">Name</div>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="question-name" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-2">Parent</div>
+                    <div class="col-sm-10">
+                        <select class="form-control" name="parent" id="parent">
+                            @{
+                                foreach (SelectListItem intent in intentNames)
+                                {
+                                    <option value="@intent.Value">@intent.Text</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="saveProject" type="button" class="btn btn-default">Save</button>
+                <button id="closeProject" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
-
-
     $(document).on('click', '.conductReview', function () {
-        var questionId = $(this).data('id');
-        var finalProject = { questionId: questionId };
+        $("#question-id").val($(this).data('id'));
+        $("#question-name").val($(this).data('question'));
+    });
+
+    $(document).on('click', '#saveProject', function () {
+        var questionId = $("#question-id").val();
+        var questionName = $("#question-name").val();
+        var intentId = $("#parent").val();
+        var operation = $('#operation').val();
+        var updatedDate = new Date;
+        
+        var finalProject = { questionId: questionId, questionName: questionName, ChatIntentId: intentId};
         $.ajax({
             type: "POST",
             url: "/home/FailReviewUpdate/",
@@ -74,12 +136,28 @@
             contentType: "application/json; charset=utf-8",
             dataType: "json",
             success: function (result) {
-                location.reload();
+                $('#lastUpdated').html('Updated Successfully <span style="color:green" class="glyphicon glyphicon-ok-circle"> </span>');
+                $('#table-reload').val("y");
+                $('#saveProject').attr('disabled', 'disabled');
             },
             error: function (errorMsg) {
-
+                $('#lastUpdated').html('Updated Failed <span style="color:red" class="glyphicon glyphicon-remove-circle"> </span>');
+                $('#table-reload').val("n");
+                $('#saveProject').removeAttr('disabled');
             }
         });
+    });
+
+    //Close Modal
+
+    $(document).on('click', '#closeProject', function () {
+        if ($('#table-reload').val() == "y") {
+            location.reload();
+        }
+    });
+
+    $('#parent').change(function () {
+        $('#parent-id').val($(this).val());
     });
 
 </script>

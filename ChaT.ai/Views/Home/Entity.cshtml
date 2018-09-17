@@ -14,17 +14,17 @@
         font-size: x-large;
     }
 </style>
-
 <div style="padding-top:23px;">
+    @Html.Partial("_AdminPartial")
+</div>
+
+<div style="padding-top:15px;">
     <span class="page-subheader">Entity</span>
     <button type="button" class="btn btn-link newProject"
             data-toggle="modal"
             data-target="#projectModal">
         Create
     </button>
-</div>
-<div>
-    @Html.Partial("_AdminPartial")
 </div>
 
 <table class="table">
@@ -130,109 +130,109 @@
 
 <script>
 
-        $(function () {
+    $(function () {
 
-            $(document).ready(function () {
-                //$('#questionTable').DataTable({
-                //    "pageLength": 50
-               // });
-            });
+        $(document).ready(function () {
+            //$('#questionTable').DataTable({
+            //    "pageLength": 50
+            // });
+        });
 
-            //open Modal for existing project
+        //open Modal for existing project
 
-            $(document).on('click', '.openExistingProject', function () {
-                $('#saveProject').html('Update');
-                $('#saveProject').removeAttr('disabled');
-                $('#entityId').val($(this).data('id'));
-                $('#intentId').val($(this).data('intentid'));
-                $('#intentName').val($(this).data('intentid'));
-                $('#intentName option:selected').text($(this).data('intentname'));
-                $('#entityName').val($(this).data('name'));
-                $('#entityDesc').val($(this).data('desc'));
-                $('#lastUpdated').html('Last Updated: ' + $(this).data('lastupdated'));
-                $('#operation').val("u");
-            });
+        $(document).on('click', '.openExistingProject', function () {
+            $('#saveProject').html('Update');
+            $('#saveProject').removeAttr('disabled');
+            $('#entityId').val($(this).data('id'));
+            $('#intentId').val($(this).data('intentid'));
+            $('#intentName').val($(this).data('intentid'));
+            $('#intentName option:selected').text($(this).data('intentname'));
+            $('#entityName').val($(this).data('name'));
+            $('#entityDesc').val($(this).data('desc'));
+            $('#lastUpdated').html('Last Updated: ' + $(this).data('lastupdated'));
+            $('#operation').val("u");
+        });
 
-            //open Modal for delete
+        //open Modal for delete
 
-            $(document).on('click', '.deleteExistingProject', function () {
-                $('#saveProject').html('Delete');
-                $('#saveProject').removeAttr('disabled');
-                $('#entityId').val($(this).data('id'));
-                $('#intentId').val($(this).data('intentid'));
-                $('#intentName').val($(this).data('intentid'));
-                $('#intentName option:selected').text($(this).data('intentname'));
-                $('#entityName').val($(this).data('name'));
-                $('#entityDesc').val($(this).data('desc'));
-                $('#lastUpdated').html('Last Updated: ' + $(this).data('lastupdated'));
-                $('#operation').val("d");
-            });
-
-
-            //open Modal for new project
-
-            $(document).on('click', '.newProject', function () {
-                $('#saveProject').html('Add');
-                $('#saveProject').removeAttr('disabled');
-                $('#entityId').val(0);
-                $('#lastUpdated').html('Adding New Entity');
-                $('#operation').val("a");
-            });
+        $(document).on('click', '.deleteExistingProject', function () {
+            $('#saveProject').html('Delete');
+            $('#saveProject').removeAttr('disabled');
+            $('#entityId').val($(this).data('id'));
+            $('#intentId').val($(this).data('intentid'));
+            $('#intentName').val($(this).data('intentid'));
+            $('#intentName option:selected').text($(this).data('intentname'));
+            $('#entityName').val($(this).data('name'));
+            $('#entityDesc').val($(this).data('desc'));
+            $('#lastUpdated').html('Last Updated: ' + $(this).data('lastupdated'));
+            $('#operation').val("d");
+        });
 
 
+        //open Modal for new project
 
-            // save project
+        $(document).on('click', '.newProject', function () {
+            $('#saveProject').html('Add');
+            $('#saveProject').removeAttr('disabled');
+            $('#entityId').val(0);
+            $('#lastUpdated').html('Adding New Entity');
+            $('#operation').val("a");
+        });
 
-            $(document).on('click', '#saveProject', function () {
-                var entityId = $('#entityId').val();
-                var entityName = $('#entityName').val();
-                var entityDesc = $('#entityDesc').val();
-                var intendId = $('#intentName').val(); // $('#intendId').val();
-                var intendName = $('#intentName option:selected').text();
-                var operation = $('#operation').val();
-                var updatedDate = new Date;
-                debugger;
-                var project = { ChatEntityId: entityId, EntityName: entityName, EntityDescription: entityDesc, ChatIntentId: intendId, ChatIntentName: intendName, UpdatedDate: updatedDate };
-                var finalProject = { entity: project, operation: operation };
-                $.ajax({
-                    type: "POST",
-                    url: "/home/EntityUpdate/",
-                    data: JSON.stringify(finalProject),
-                    contentType: "application/json; charset=utf-8",
-                    dataType: "json",
-                    success: function (result) {
-                        if (result == true) {
-                            $('#lastUpdated').html('Updated Successfully <span style="color:green" class="glyphicon glyphicon-ok-circle"> </span>');
-                            $('#table-reload').val("y");
-                            $('#saveProject').attr('disabled', 'disabled');
-                        }
-                        else {
-                            $('#lastUpdated').html('Updated Failed <span style="color:red" class="glyphicon glyphicon-remove-circle"> </span>');
-                            $('#table-reload').val("n");
-                            $('#saveProject').removeAttr('disabled');
-                        }
-                    },
-                    error: function (errorMsg) {
-                        $('#lastUpdated').html('<span class="alert alert-warning">' + errorMsg.statusText + '</span> ');
+
+
+        // save project
+
+        $(document).on('click', '#saveProject', function () {
+            var entityId = $('#entityId').val();
+            var entityName = $('#entityName').val();
+            var entityDesc = $('#entityDesc').val();
+            var intendId = $('#intentName').val(); // $('#intendId').val();
+            var intendName = $('#intentName option:selected').text();
+            var operation = $('#operation').val();
+            var updatedDate = new Date;
+            debugger;
+            var project = { ChatEntityId: entityId, EntityName: entityName, EntityDescription: entityDesc, ChatIntentId: intendId, ChatIntentName: intendName, UpdatedDate: updatedDate };
+            var finalProject = { entity: project, operation: operation };
+            $.ajax({
+                type: "POST",
+                url: "/home/EntityUpdate/",
+                data: JSON.stringify(finalProject),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (result) {
+                    if (result == true) {
+                        $('#lastUpdated').html('Updated Successfully <span style="color:green" class="glyphicon glyphicon-ok-circle"> </span>');
+                        $('#table-reload').val("y");
+                        $('#saveProject').attr('disabled', 'disabled');
                     }
-                });
-            });
-
-
-
-            //Close Modal
-
-            $(document).on('click', '#closeProject', function () {
-                if ($('#table-reload').val() == "y") {
-                    location.reload();
+                    else {
+                        $('#lastUpdated').html('Updated Failed <span style="color:red" class="glyphicon glyphicon-remove-circle"> </span>');
+                        $('#table-reload').val("n");
+                        $('#saveProject').removeAttr('disabled');
+                    }
+                },
+                error: function (errorMsg) {
+                    $('#lastUpdated').html('<span class="alert alert-warning">' + errorMsg.statusText + '</span> ');
                 }
             });
-
-            $('#intentName').change(function () {
-                $('#intentId').val($(this).val());
-            });
-
         });
+
+
+
+        //Close Modal
+
+        $(document).on('click', '#closeProject', function () {
+            if ($('#table-reload').val() == "y") {
+                location.reload();
+            }
+        });
+
+        $('#intentName').change(function () {
+            $('#intentId').val($(this).val());
+        });
+
+    });
 
 
 
