@@ -26,6 +26,7 @@ $(function () {
         $('#subestimated').val($(this).data('estimated'));
         $('#subactual').val($(this).data('actual'));
         $('#lastUpdated').html('Last Updated: ' + $(this).data('lastupdated'));
+        $('#story-name').html("Story - " + $(this).data('featurename'));
         $('#operation').val("u");
     });
 
@@ -56,6 +57,7 @@ $(function () {
         $('#subestimated').val($(this).data('estimated'));
         $('#subactual').val($(this).data('actual'));
         $('#lastUpdated').html('Last Updated: ' + $(this).data('lastupdated'));
+        $('#story-name').html("Story - " + $(this).data('featurename'));
         $('#operation').val("d");
     });
 
@@ -68,6 +70,7 @@ $(function () {
         $('#feature-id').val($(this).data('featureid'));
         $('#subfeature-id').val(0);
         $('#lastUpdated').html('Adding New Feature');
+        $('#story-name').html("Story - " + $(this).data('featurename'));
         $('#operation').val("a");
     });
 
@@ -96,12 +99,12 @@ $(function () {
                 if (result == true) {
                     $('#lastUpdatedSub').html('Updated Successfully <span style="color:green" class="glyphicon glyphicon-ok-circle"> </span>');
                     $('#table-reload').val("y");
-                    $('#saveProject').attr('disabled', 'disabled');
+                    $('#saveSubFeature').attr('disabled', 'disabled');
                 }
                 else {
                     $('#lastUpdatedSub').html('Updated Failed <span style="color:red" class="glyphicon glyphicon-remove-circle"> </span>');
                     $('#table-reload').val("n");
-                    $('#saveProject').removeAttr('disabled');
+                    $('#saveSubFeature').removeAttr('disabled');
                 }
             },
             error: function (errorMsg) {

@@ -10,6 +10,8 @@ namespace ChaT.ai.Dto
     {
         public List<ChatFeatureList> feature { get; set; }
         public List<ChatSubFeatureList> subfeature { get; set; }
+        public int FeaturesDeveloped { get; set; }
+        public int? ActualHrs { get; set; }
     }
 
     public class FeatureOperation

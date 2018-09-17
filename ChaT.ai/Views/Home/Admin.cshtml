@@ -21,6 +21,14 @@
             data-target="#projectModal">
         Add Feature
     </button>
+    <span class="page-subheader" style="float:right;padding-left:23px;">        
+        <span style="color:#545353">Hours Spent:</span>
+        <span style="color:green">@Model.ActualHrs</span>
+    </span>
+    <span class="page-subheader" style="float:right;">        
+        <span style="color:#545353">Stories Developed:</span>
+        <span style="color:green">@Model.FeaturesDeveloped</span>
+    </span>
 </div>
 <table class="table" id="questionTable">
     <thead>
@@ -70,6 +78,7 @@
                         <button type="button" class="btn btn-default glyphicon glyphicon-plus newSubFeature"
                                 data-toggle="modal"
                                 data-featureid="@item.FeatureId"
+                                data-featurename="@item.FeatureName"
                                 data-target="#subFeatureModal"></button>
                     </td>
                     <td>
@@ -129,6 +138,7 @@
                                 <button type="button" class="btn btn-default glyphicon glyphicon-edit openExistingSubFeature"
                                         data-toggle="modal"
                                         data-featureid="@subitem.FeatureId"
+                                        data-featurename="@item.FeatureName"
                                         data-subfeatureid="@subitem.SubFeatureId"
                                         data-subfeaturename="@subitem.SubFeatureName"
                                         data-subfeaturedesc="@subitem.SubFeatureDesc"
@@ -143,11 +153,12 @@
                                 <button type="button" class="btn btn-default glyphicon glyphicon-trash deleteExistingSubFeature"
                                         data-toggle="modal"
                                         data-featureid="@subitem.FeatureId"
+                                        data-featurename="@item.FeatureName"
                                         data-subfeatureid="@subitem.SubFeatureId"
-                                        data-featurename="@subitem.SubFeatureName"
-                                        data-featuredesc="@subitem.SubFeatureDesc"
-                                        data-featurestory="@substory"
-                                        data-featuredev="@subdev"
+                                        data-subfeaturename="@subitem.SubFeatureName"
+                                        data-subfeaturedesc="@subitem.SubFeatureDesc"
+                                        data-subfeaturestory="@substory"
+                                        data-subfeaturedev="@subdev"
                                         data-estimated="@subitem.EffortEstimated"
                                         data-actual="@subitem.EffortActual"
                                         data-lastupdated="@subitem.UpdatedDate"
@@ -220,7 +231,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="appHeading">Feature</h4>
+                <h4 class="appHeading" id="story-name">Story</h4>
                 <div><span style="color:dodgerblue" id="lastUpdatedSub"></span></div>
             </div>
 

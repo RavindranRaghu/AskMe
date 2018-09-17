@@ -195,6 +195,16 @@ namespace ChaT.ai.Controllers
             FeatureDto featureDto = new FeatureDto();
             featureDto.feature = db.ChatFeatureList.ToList();
             featureDto.subfeature = db.ChatSubFeatureList.ToList();
+            featureDto.FeaturesDeveloped = featureDto.subfeature.Where(x => x.DevelopmentComplete).Count();
+            if (featureDto.subfeature.Where(x => x.EffortActual > 0).Any())
+            {
+                featureDto.ActualHrs = featureDto.subfeature.Select(x => x.EffortActual).ToList().Sum();
+            }
+            else
+            {
+                featureDto.ActualHrs = 0;
+            }
+            
             return View(featureDto);
         }
 
