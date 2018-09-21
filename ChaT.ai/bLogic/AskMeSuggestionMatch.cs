@@ -22,20 +22,25 @@ namespace ChaT.ai.bLogic
             db = new ChatDatabaseModel();
         }
 
-        public KeyValuePair<int, bool> FullMatch (List<ChatIntent> intentList)
+        public KeyValuePair<int, bool> FullSuggestionMatch (List<ChatIntent> intentList)
         {
             int matchingIntent = 0;
             bool hasMatch = false;
-            var intentMatch = intentList.Where(x=>x.IntentDescription.ToLower() == Message);
-            if (intentMatch.Any())
+            foreach(var intent in intentList)
             {
-                hasMatch = true;
-                matchingIntent = intentMatch.Select(x => x.ChatIntentId).FirstOrDefault();
+                string intentString = intent.IntentDescription.ToLower();
+                if (String.Equals(intentString, Message,StringComparison.OrdinalIgnoreCase))
+                {
+                    hasMatch = true;
+                    matchingIntent = intent.ChatIntentId;
+                    break;
+                }
             }
+
             return new KeyValuePair<int, bool>(matchingIntent, hasMatch);
         }
 
-        public KeyValuePair<int, bool> PartialMatch(List<ChatIntent> intentList)
+        public KeyValuePair<int, bool> PartialSuggestionMatch(List<ChatIntent> intentList)
         {
             bool hasMatch = false;
             int highestMatchIntent = 0;

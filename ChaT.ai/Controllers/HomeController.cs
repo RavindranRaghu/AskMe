@@ -17,8 +17,7 @@ namespace ChaT.ai.Controllers
     public class HomeController : Controller
     {
         // GET: Home
-        private ChatDatabaseModel db;
-
+        private ChatDatabaseModel db;        
         public HomeController()
         {
             db = new ChatDatabaseModel();
@@ -34,6 +33,11 @@ namespace ChaT.ai.Controllers
 
         public ActionResult Chat(string sender, string message, int node)
         {
+            AskMeContentManager contentManager = new AskMeContentManager();
+            if (message.Length>0 )
+            {
+                message = message.Trim();
+            }
             message = message.ToLower();
             string finalResponse = string.Empty;
             string phoneNumber = string.Empty;

@@ -15,6 +15,8 @@ namespace ChaT.ai.bLogic
         private AskMeHiBye hiBye;
         private AskMeSuggestionMatch suggestionMatch;
         private AskMeCommon common;
+        private AskMezPossibleMatch zPossibleMatch;
+        private AskMeSynonymMatch synonymMatch;
         private AskMeContentManager contentManager = new AskMeContentManager();
         KeyValuePair<int, string> finalResponse = new KeyValuePair<int, string>();
         public AskMeChannel(string message, int node)
@@ -25,6 +27,8 @@ namespace ChaT.ai.bLogic
             hiBye = new AskMeHiBye(Message, Node);
             suggestionMatch = new AskMeSuggestionMatch(Message, Node);
             common = new AskMeCommon(Message, Node);
+            zPossibleMatch = new AskMezPossibleMatch(Message, Node);
+            synonymMatch = new AskMeSynonymMatch(Message, Node);
         }
 
         //ChaT Bot Reponse Main Entry
@@ -173,14 +177,14 @@ namespace ChaT.ai.bLogic
                                            select intention).ToList();
 
             #region 2.CheckIntentFullMatchbySuggestion
-            KeyValuePair<int, bool> fullMatch = suggestionMatch.FullMatch(intentList);
+            KeyValuePair<int, bool> fullMatch = suggestionMatch.FullSuggestionMatch(intentList);
             if (fullMatch.Value)
             {
                 responseMessage = intentList.Where(x => x.ChatIntentId == fullMatch.Key).Select(x => x.Response).FirstOrDefault();
                 return new KeyValuePair<int, string>(fullMatch.Key, responseMessage);
             }
 
-            KeyValuePair<int, bool> partialMatch = suggestionMatch.PartialMatch(intentList);
+            KeyValuePair<int, bool> partialMatch = suggestionMatch.PartialSuggestionMatch(intentList);
             if (partialMatch.Value)
             {
                 responseMessage = intentList.Where(x => x.ChatIntentId == partialMatch.Key).Select(x => x.Response).FirstOrDefault();
@@ -193,7 +197,7 @@ namespace ChaT.ai.bLogic
             if (vocabList.Count == 0)
                 return new KeyValuePair<int, string>(Node, responseMessage);
 
-
+            #region 3.TFIDF Match Process
             SimilarityCalculator similarityCalculator = new SimilarityCalculator();
             List<ChatIntentQuestion> questionList = db.ChatIntentQuestion.ToList();
             Dictionary<int, double> scoreDict = new Dictionary<int, double>();
@@ -235,6 +239,35 @@ namespace ChaT.ai.bLogic
                 responseMessage = responseMessage + "<br>" + contentManager.IntentSuggestionResponse;
                 return new KeyValuePair<int, string>(Node, responseMessage);
             }
+            #endregion
+
+            #region 4.Probable Match Process
+            KeyValuePair<string, bool> probableMatchCorrect = zPossibleMatch.ProbableMatchCorrectSpelling(vocabList);
+            if (probableMatchCorrect.Value)
+            {
+                common.LogFailureResponse();
+                responseMessage = probableMatchCorrect.Key;
+                return new KeyValuePair<int, string>(Node, responseMessage);
+            }
+
+            KeyValuePair<string, bool> probableMatchTypo = zPossibleMatch.ProbableMatchTypoError(vocabList);
+            if (probableMatchTypo.Value)
+            {
+                common.LogFailureResponse();
+                responseMessage = probableMatchTypo.Key;
+                return new KeyValuePair<int, string>(Node, responseMessage);
+            }
+            #endregion
+
+            #region 4.Synonym Match Process
+            KeyValuePair<string, bool> synMatch = synonymMatch.SynonymMatch(vocabList);
+            if (synMatch.Value)
+            {
+                common.LogFailureResponse();
+                responseMessage = synMatch.Key;
+                return new KeyValuePair<int, string>(Node, responseMessage);
+            }
+            #endregion
 
             return new KeyValuePair<int, string>(Node, responseMessage);
         }

@@ -157,6 +157,8 @@
     <Compile Include="bLogic\AskMeCommon.cs" />
     <Compile Include="bLogic\AskMeContentManager.cs" />
     <Compile Include="bLogic\AskMeDepcrecated.cs" />
+    <Compile Include="bLogic\AskMeSynonymMatch.cs" />
+    <Compile Include="bLogic\AskMezPossibleMatch.cs" />
     <Compile Include="bLogic\AskMeSuggestionMatch.cs" />
     <Compile Include="bLogic\AskMeHiBye.cs" />
     <Compile Include="bLogic\AskMeSpeech.cs" />
@@ -169,6 +171,7 @@
     <Compile Include="Dto\ParamOperation.cs" />
     <Compile Include="Dto\IntentOperation.cs" />
     <Compile Include="Dto\SpeechResponseDto.cs" />
+    <Compile Include="Dto\SynonymDto.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
