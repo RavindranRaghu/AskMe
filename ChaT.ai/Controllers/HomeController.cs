@@ -536,7 +536,7 @@ namespace ChaT.ai.Controllers
             request.Method = "POST";
             request.ProtocolVersion = HttpVersion.Version11;
             request.ContentType = @"audio/wav; codec=audio/pcm; samplerate=16000";
-            request.Headers["Ocp-Apim-Subscription-Key"] = "7bae8a4d0172428d8ecfb906d17cdd56";
+            request.Headers["Ocp-Apim-Subscription-Key"] = "a7e75b07b0064ed596d39fcdb21dd482";
 
             // Send an audio file by 1024 byte chunks
             Guid guid = Guid.NewGuid();

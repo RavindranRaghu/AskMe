@@ -5,9 +5,10 @@
 }
 
 <style>
+
     .panel-body {
-        height: 500px;  
-        overflow-y:auto;
+        height: 600px;
+        overflow-y: auto;
     }
 
     .panel-footer {
@@ -15,8 +16,8 @@
         border: none;
     }
 
-    #chat-history{
-        font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    #chat-history {
+        font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
     }
 
     .userDiv {
@@ -89,8 +90,6 @@
         border-radius: 10px;
         box-shadow: 2px 3px whitesmoke;
     }
-
-
 </style>
 
 <div style="padding:10px;">
@@ -101,7 +100,7 @@
             </div>
             <div class="panel-footer">
                 <div class="row">
-                    <div class="col-sm-8">
+                    <div class="col-sm-7">
                         <input id="message" class="form-control" type="text" style="min-width:300px;max-width:600px;height:80px;" />
                         <input id="node-level" type="hidden" value="@ViewBag.nodeLevel" />
                         <input id="welcome-message" type="hidden" value="@ViewBag.Welcome" />
@@ -111,7 +110,7 @@
                             <span class="glyphicon glyphicon-send" style="font-size:x-large"></span>
                         </button>
                     </div>
-                    <div class="col-sm-2">
+                    <div class="col-sm-3">
                         <div id="controls">
                             <img id="record" src="~/Content/img/mic128.png" onclick="toggleRecording(this);">
                             <img id="loader" src="~/Content/img/loader.gif" />
@@ -144,16 +143,6 @@
 <script>
     $(function () {
 
-        $(window).on("load", function () {
-            $(window).load(function () {
-                $("#chat-history").mCustomScrollbar({
-                    theme: "dark",
-                    mouseWheelPixels: 80,
-                    scrollInertia: 0
-                });
-            });
-        });
-
         var launchMessage = $("#welcome-message").val();
         var resposeMessage = launchMessage.replace(/<br>/g, "");
         responsiveVoice.speak(resposeMessage);
@@ -175,9 +164,6 @@
             var message = "  " + $("#message").val();
             var chathtml = $("#chat-history").html();
             var node = $("#node-level").val();
-            $(".panel-body").animate({
-                scrollTop: $('.panel-body')[0].scrollHeight - $('.panel-body').height()
-            }, 400);
             chathtml = chathtml + '<div class="userDiv"><span class="userChat"><span class="glyphicon glyphicon-user"> </span>&nbsp<span>' + message + '</span></span></div>';
             var data1 = { sender: "default", message: message, node: node };
             getChatResponse(data1, chathtml);
@@ -187,9 +173,6 @@
             var message = $(this).data("message");
             var chathtml = $("#chat-history").html();
             var node = $("#node-level").val();
-            $(".panel-body").animate({
-                scrollTop: $('.panel-body')[0].scrollHeight - $('.panel-body').height()
-            }, 400);
             chathtml = chathtml + '<div class="userDiv"><span class="userChat"><span class="glyphicon glyphicon-user"> </span>&nbsp<span>' + message + '</span></span></div>';
             var data1 = { sender: "default", message: message, node: node };
             getChatResponse(data1, chathtml);
@@ -243,7 +226,7 @@
                 splitResponseMessage.forEach(function (splitMessage) {
                     chathtml = chathtml + '<div class="botDiv" ><span class="botChat"><span class="glyphicon glyphicon-bullhorn"> </span>&nbsp<span>' + splitMessage + '</span></span></div>';
                 });
-                responsiveVoice.speak(chatResposeMessage);                
+                responsiveVoice.speak(chatResposeMessage);
                 //chathtml = chathtml + '<div class="botDiv" ><span class="botChat"><span class="glyphicon glyphicon-bullhorn"> </span>&nbsp<span>' + data.response + '</span></span></div>';
                 //chathtml = chathtml + '<p style="float:right"><div >Bot says:</div><div>' + data + '</div></p>';
                 $("#chat-history").html(chathtml);
@@ -259,17 +242,23 @@
                     $("#suggest-list").html(suggestHtml);
                     $("#suggest-list").show('fadeIn', {}, 500)
                 }, 500);
+
+                var objDiv = document.getElementById("chat-history");
+                //
+                $(".panel-body").animate({
+                    scrollTop: $('.panel-body')[0].scrollHeight - $('.panel-body').height()
+                }, objDiv.scrollHeight);
+                objDiv.scrollTop = objDiv.scrollHeight;
             },
             error: function (xhr, textStatus, error) {
 
                 console.log("Response " + error);
             }
         });
-    } 
+    }
 
 </script>
 <script src="~/Scripts/audio-display.js"></script>
 <script src="~/Scripts/audio-recorder.js"></script>
 <script src="~/Scripts/audio-recordworker.js"></script>
 <script src="~/Scripts/audio-main.js"></script>
-<link href="~/Scripts/jquery.mCustomScrollbar.concat.min.js" />
