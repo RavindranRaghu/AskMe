@@ -54,8 +54,14 @@ namespace ChaT.ai.Controllers
                 ChatIntent intent = hasOneIntentwithEntity.FirstOrDefault();
                 ChatEntity entity = db.ChatEntity.Where(x => x.ChatIntentId == intent.ChatIntentId).FirstOrDefault();
                 AskMeEntityMatch entityMatch = new AskMeEntityMatch(message, node);
-                EntityIdentifiedDto entityIdentifedDto = entityMatch.HasOneChildIntentWithOneEntity(entity, intent);
-                finalResponse = entityIdentifedDto.ChatResponse;
+                EntityIdentifiedDto entityIdentifedDto = new EntityIdentifiedDto();
+                if (entity.EntityName != null){
+                    entityIdentifedDto = entityMatch.HasOneChildIntentWithOneEntity(entity, intent);
+                    finalResponse = entityIdentifedDto.ChatResponse;
+                }
+                else{
+                    finalResponse = intent.Response;
+                }
                 node = intent.ChatIntentId;
             }
             else // 
