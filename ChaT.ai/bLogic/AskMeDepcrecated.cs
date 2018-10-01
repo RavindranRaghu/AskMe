@@ -65,5 +65,64 @@ namespace ChaT.ai.bLogic
         //    responseMessage = childIntent.Value;
         //    Node = childIntent.Key;
         //}
+
+        //private KeyValuePair<int, string> GetChildIntent(int chatIntentId, List<string> vocabList)
+        //{
+        //    string entity = string.Empty;
+        //    List<ChatIntent> intentList = db.ChatIntent.Where(z => z.ParentId == chatIntentId).ToList();
+
+        //    foreach (string vocab in vocabList)
+        //    {
+        //        var hasIntent = intentList.Where(x => vocab.Contains(x.IntentName) || x.IntentName.Contains(vocab));
+        //        if (hasIntent.Any())
+        //        {
+        //            Dictionary<int, string> intentNameDict = hasIntent.Select(t => new { t.ChatIntentId, t.Response }).ToList().ToDictionary(x => x.ChatIntentId, y => y.Response);
+        //            foreach (KeyValuePair<int, string> intentName in intentNameDict)
+        //            {
+        //                return intentName;
+        //            }
+        //        }
+        //    }
+
+        //    List<string> intentNames = intentList.Select(x => x.IntentName).ToList();
+        //    LevenshteinDistance dist = new LevenshteinDistance();
+        //    foreach (string vocab in vocabList)
+        //    {
+        //        foreach (string intentName in intentNames)
+        //        {
+        //            if (dist.Compute(vocab, intentName) < 4)
+        //            {
+        //                //entity = entityName;
+        //                //return entity;
+        //            }
+        //        }
+        //    }
+
+        //    return new KeyValuePair<int, string>();
+        //}
+
+
+
+        //ChatIntent nodeDetail = db.ChatIntent.Where(x => x.ChatIntentId == node).FirstOrDefault();
+        //if (nodeDetail.IntentName == "askpaymentspecialist")
+        //{
+        //    Session["phone"] = message;
+        //    nodeDetail = db.ChatIntent.Where(x => x.ParentId == node).FirstOrDefault();
+        //    finalResponse = nodeDetail.Response;
+        //    node = nodeDetail.ChatIntentId;
+        //}
+        //else if (nodeDetail.IntentName == "askphonenumber")
+        //{
+        //    nodeDetail = db.ChatIntent.Where(x => x.ParentId == node).FirstOrDefault();
+        //    if (Session["phone"] != null)
+        //        phoneNumber = Session["phone"].ToString();
+        //    else
+        //        phoneNumber = "+1 980 233 7575";
+
+        //    finalResponse = nodeDetail.Response;
+        //    finalResponse = finalResponse.Replace("paramphonenumber", phoneNumber);
+        //    finalResponse = finalResponse.Replace("paramappointmenttime", message);
+        //    node = nodeDetail.ChatIntentId;
+        //}
     }
 }

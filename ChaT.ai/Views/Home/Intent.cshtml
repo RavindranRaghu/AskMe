@@ -92,6 +92,14 @@
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
                 <h4 class="appHeading">Intent</h4>
                 <div><span style="color:dodgerblue" id="lastUpdated"></span></div>
+                <div class="alert alert-warning">
+                    <div>
+                        1. If an Intent has Entity, it should be contain the "entity" in the Intent Name. for ex: askentityphonenumber
+                    </div>
+                    <div>
+                        2. Inorder to return an Entity Name in the Chat, Response should have the format "[entityname]" in the response. for ex: thanks, number "[phonenumber]"has noted
+                    </div>                    
+                </div>
             </div>
 
             <div class="modal-body">
@@ -129,7 +137,7 @@
                     <div class="col-sm-10"><input type="text" class="form-control" id="response" /></div>
                 </div>
             </div>
-            <div class="modal-footer">
+            <div class="modal-footer">                
                 <button id="saveProject" type="button" class="btn btn-default">Save</button>
                 <button id="closeProject" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
             </div>

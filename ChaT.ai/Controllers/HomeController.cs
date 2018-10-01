@@ -42,28 +42,23 @@ namespace ChaT.ai.Controllers
             string finalResponse = string.Empty;
             string phoneNumber = string.Empty;
             KeyValuePair<int, string> responseMessage = new KeyValuePair<int, string>();
-            ChatIntent nodeDetail = db.ChatIntent.Where(x => x.ChatIntentId == node).FirstOrDefault();
-            if (nodeDetail.IntentName == "askpaymentspecialist")
-            {
-                Session["phone"] = message;
-                nodeDetail = db.ChatIntent.Where(x => x.ParentId == node).FirstOrDefault();
-                finalResponse = nodeDetail.Response;
-                node = nodeDetail.ChatIntentId;
-            }
-            else if (nodeDetail.IntentName == "askphonenumber")
-            {
-                nodeDetail = db.ChatIntent.Where(x => x.ParentId == node).FirstOrDefault();
-                if (Session["phone"] != null)
-                    phoneNumber = Session["phone"].ToString();
-                else
-                    phoneNumber = "+1 980 233 7575";
 
-                finalResponse = nodeDetail.Response;
-                finalResponse = finalResponse.Replace("paramphonenumber", phoneNumber);
-                finalResponse = finalResponse.Replace("paramappointmenttime", message);
-                node = nodeDetail.ChatIntentId;
+            var hasOneIntentwithEntity = (from inte in db.ChatIntent
+                                      where inte.ParentId == node
+                                      && inte.IntentName.Contains("entity")
+                                      select inte).ToList();
+
+            // Check if Chat has one Intent with Entity
+            if (hasOneIntentwithEntity.Count ==  1)
+            {
+                ChatIntent intent = hasOneIntentwithEntity.FirstOrDefault();
+                ChatEntity entity = db.ChatEntity.Where(x => x.ChatIntentId == intent.ChatIntentId).FirstOrDefault();
+                AskMeEntityMatch entityMatch = new AskMeEntityMatch(message, node);
+                EntityIdentifiedDto entityIdentifedDto = entityMatch.HasOneChildIntentWithOneEntity(entity, intent);
+                finalResponse = entityIdentifedDto.ChatResponse;
+                node = intent.ChatIntentId;
             }
-            else
+            else // 
             {
                 AskMeChannel channel = new AskMeChannel(message, node);
                 responseMessage = channel.ChatInitializer();
@@ -84,6 +79,8 @@ namespace ChaT.ai.Controllers
                     finalResponse = finalResponse.Replace("parametercustomername", custName);
                 }
             }
+
+            // Get Suggestions List
             List<string> suggest = new List<string>();
             var hasSuggest = db.ChatIntent.Where(x => x.ParentId == node && x.ChatIntentId > 2).Select(y => y.IntentDescription);
             if (hasSuggest.Any())

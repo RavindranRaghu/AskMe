@@ -142,7 +142,6 @@
     <Content Include="Scripts\bootstrap.min.js" />
     <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
-    <Content Include="Scripts\FaceScroll.js" />
     <Content Include="Scripts\featuresub.js" />
     <Content Include="Scripts\feature.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />
@@ -160,6 +159,7 @@
     <Compile Include="bLogic\AskMeCommon.cs" />
     <Compile Include="bLogic\AskMeContentManager.cs" />
     <Compile Include="bLogic\AskMeDepcrecated.cs" />
+    <Compile Include="bLogic\AskMeEntityMatch.cs" />
     <Compile Include="bLogic\AskMeSynonymMatch.cs" />
     <Compile Include="bLogic\AskMezPossibleMatch.cs" />
     <Compile Include="bLogic\AskMeSuggestionMatch.cs" />
@@ -170,6 +170,7 @@
     <Compile Include="Dto\AskDto.cs" />
     <Compile Include="Dto\AskOperation.cs" />
     <Compile Include="Dto\AudioContent.cs" />
+    <Compile Include="Dto\EntityIdentifiedDto.cs" />
     <Compile Include="Dto\FeatureDto.cs" />
     <Compile Include="Dto\ParamOperation.cs" />
     <Compile Include="Dto\IntentOperation.cs" />
