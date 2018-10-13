@@ -14,8 +14,9 @@
     }
 
 .navbar-inverse .navbar-brand:hover, .navbar-inverse .navbar-brand:focus {
-    color:black;
+    color:crimson;
 }
+
 /* Set padding to keep content from hitting the edges */
 .body-content {
     padding-left: 15px;
