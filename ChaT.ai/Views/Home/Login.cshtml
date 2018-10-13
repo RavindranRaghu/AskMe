@@ -1,0 +1,27 @@
+﻿
+@{
+    ViewBag.Title = "Login";
+}
+
+<style>
+    #ud {
+        font-size: x-large;
+    }
+    #pd {
+        font-size: x-large;
+    }
+    .form-control {
+        margin-bottom:15px;
+    }
+</style>
+
+<h2 style="padding-top:20px;">Login</h2>
+
+<form action="/home/login" method="post">
+    <input id="ud" name="ud" class="form-control" type="text" style="max-width:300px;height:50px;" />
+    <input id="pd" name="pd" class="form-control" type="password" style="max-width:300px;height:50px;" />
+    <button class="btn btn-success" type="submit" id="loginSubmit">
+        <span style="font-size:x-large">Submit</span>
+    </button>
+</form>
+

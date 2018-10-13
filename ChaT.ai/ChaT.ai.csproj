@@ -163,6 +163,7 @@
     <Compile Include="bLogic\AskMeSuggestionMatch.cs" />
     <Compile Include="bLogic\AskMeHiBye.cs" />
     <Compile Include="bLogic\AskMeSpeech.cs" />
+    <Compile Include="cAuth\AskMeAuthorize.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Dto\EntityDto.cs" />
     <Compile Include="Dto\AskDto.cs" />
@@ -197,6 +198,8 @@
     <Content Include="Views\Home\Entity.cshtml" />
     <Content Include="Views\Home\fail.cshtml" />
     <Content Include="Views\Home\Admin.cshtml" />
+    <Content Include="Views\Home\Login.cshtml" />
+    <Content Include="Views\Shared\Unauthorized.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

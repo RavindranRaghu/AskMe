@@ -12,6 +12,7 @@ using ChaT.ai.Dto;
 using System.Net;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
+using ChaT.ai.cAuth;
 
 namespace ChaT.ai.Controllers
 {
@@ -30,6 +31,35 @@ namespace ChaT.ai.Controllers
             ViewBag.Welcome = db.ChatIntent.Where(x => x.ChatIntentId == 0).Select(x => x.Response).FirstOrDefault();
             List<ChatIntent> intentList = db.ChatIntent.Where(x => x.ParentId == 0 & x.ChatIntentId > 2).ToList();
             return View(intentList);
+        }
+
+        [HttpGet]
+        public ActionResult Login()
+        {
+            if (Session["loginsuccess"] != null)
+            {
+                if (Session["loginsuccess"].ToString() == "yes")
+                {
+                    return RedirectToAction("Admin");
+                }
+            }
+            return View();
+        }
+
+        [HttpPost]
+        public ActionResult Login(string ud, string pd)
+        {
+            if (ud.ToLower() == "admin" && pd=="1234")
+            {
+                Session["loginsuccess"] = "yes";
+                return RedirectToAction("Admin");
+            }
+            else
+            {
+                Session["loginsuccess"] = "no";
+            }
+
+            return View();
         }
 
         public ActionResult Chat(string sender, string message, int node)
@@ -102,6 +132,7 @@ namespace ChaT.ai.Controllers
             return Json(result, JsonRequestBehavior.AllowGet);
         }
 
+        [AskMeAuthorize()]
         public ActionResult Intent()
         {
             List<ChatIntent> intent = db.ChatIntent.ToList();
@@ -129,6 +160,7 @@ namespace ChaT.ai.Controllers
             return View(intents);
         }
 
+        [AskMeAuthorize()]
         public ActionResult ask()
         {
 
@@ -158,11 +190,13 @@ namespace ChaT.ai.Controllers
             return View(question);
         }
 
+        [AskMeAuthorize()]
         public ActionResult param()
         {
             return View(db.ChatParameter.ToList());
         }
 
+        [AskMeAuthorize()]
         public ActionResult Entity()
         {
             List<EntitytDto> entity = (from ent in db.ChatEntity
@@ -186,6 +220,7 @@ namespace ChaT.ai.Controllers
             return View(entity);
         }
 
+        [AskMeAuthorize()]
         public ActionResult fail()
         {
             List<SelectListItem> intentNames = db.ChatIntent.ToList().Select(u => new SelectListItem
@@ -198,6 +233,7 @@ namespace ChaT.ai.Controllers
             return View(db.ChatFailureResponse.ToList());
         }
 
+        [AskMeAuthorize()]
         public ActionResult Admin()
         {
             FeatureDto featureDto = new FeatureDto();
