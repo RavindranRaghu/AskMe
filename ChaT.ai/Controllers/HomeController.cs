@@ -11,6 +11,7 @@ using System.IO;
 using ChaT.ai.Dto;
 using System.Net;
 using Newtonsoft.Json;
+using System.Threading.Tasks;
 
 namespace ChaT.ai.Controllers
 {
@@ -527,7 +528,24 @@ namespace ChaT.ai.Controllers
         }
 
         [HttpPost]
-        public ActionResult UploadAudio()
+        public async Task<ActionResult> UploadAudio()
+        {
+            string text = string.Empty;
+            var file = Request.Files[0];
+            // Send an audio file by 1024 byte chunks
+            //Guid guid = Guid.NewGuid();
+            //string filepath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Content\\sound\\myRecording01.wav");
+            //string filepath2 = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Content\\sound\\" + guid.ToString() + ".wav");
+            //string filepath3 = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Content\\sound\\9458bba2-e3ff-4c12-bdbd-f1435192ac5f.wav");
+            string finalresponse = "hello";
+            AskMeSpeechtoText speechtoText = new AskMeSpeechtoText();
+            await Task.Run(() => speechtoText.SpeechProcessing(file));
+
+            return Json(finalresponse, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        public ActionResult UploadAudioBingSpeech()
         {
             string text = string.Empty;
             var file = Request.Files[0];
@@ -587,30 +605,6 @@ namespace ChaT.ai.Controllers
                 finalresponse = speechResponse.nBest[0].Display;
             else
                 finalresponse = "Sorry i did not understand";
-
-            if (System.IO.File.Exists(filepath2))
-            {
-                System.IO.File.Delete(filepath2);
-            }
-
-            return Json(finalresponse, JsonRequestBehavior.AllowGet);
-        }
-
-
-        [HttpPost]
-        public ActionResult UploadAudio1()
-        {
-            string finalresponse = string.Empty;
-            var file = Request.Files[0];
-
-            // Send an audio file by 1024 byte chunks
-            Guid guid = Guid.NewGuid();
-            string filepath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Content\\sound\\myRecording01.wav");
-            string filepath2 = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Content\\sound\\" + guid.ToString() + ".wav");
-            file.SaveAs(filepath2);
-            AskMeSpeech speech = new AskMeSpeech();
-            //finalresponse = speech.SpeechToTextGoogle(filepath2);
-            //speech.Voice2Text(filepath2);
 
             if (System.IO.File.Exists(filepath2))
             {
