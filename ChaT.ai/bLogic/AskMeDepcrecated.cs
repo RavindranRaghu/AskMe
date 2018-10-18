@@ -124,5 +124,112 @@ namespace ChaT.ai.bLogic
         //    finalResponse = finalResponse.Replace("paramappointmenttime", message);
         //    node = nodeDetail.ChatIntentId;
         //}
+
+
+
+        //ChaT Bot Reponse Main Entry
+        //public KeyValuePair<string, string> ChatResponse()
+        //{
+        //    string responseMessage = contentManager.NoIntentMatchedResponse;
+        //    string intentMessage = "NoIntentMatched";
+        //    string entity = string.Empty;
+        //    TFIDF getVocab = new TFIDF();
+        //    Dictionary<string, string> reponseDict = new Dictionary<string, string>();
+
+        //    if (hiBye.Greet())
+        //    {
+        //        return new KeyValuePair<string, string>("greet", contentManager.GreetResponse);
+        //    }
+        //    else if (hiBye.GoodBye())
+        //    {
+        //        return new KeyValuePair<string, string>("goodbye", contentManager.GoodbyeResponse);
+        //    }
+
+        //    List<string> vocabList = getVocab.GetVocabulary(Message);
+
+        //    List<ChatIntent> intentList = (from intention in db.ChatIntent
+        //                                   where intention.ChatIntentId > 2 && intention.ParentId == Node
+        //                                   select intention).ToList();
+
+        //    foreach (string vocab in vocabList)
+        //    {
+        //        var hasIntent = intentList.Where(x => x.ParentId == Node).Where(x => vocab.Contains(x.IntentName) || x.IntentName.Contains(vocab));
+        //        if (hasIntent.Any())
+        //        {
+        //            Dictionary<int, string> intentDict = hasIntent.Select(t => new { t.ChatIntentId, t.IntentName }).ToList().ToDictionary(x => x.ChatIntentId, y => y.IntentName);
+        //            foreach (KeyValuePair<int, string> intent in intentDict)
+        //            {
+        //                entity = GetEntityforIntent(intent.Key, vocabList);
+        //                if (string.IsNullOrEmpty(entity))
+        //                {
+        //                    responseMessage = intent.Value + " has been processed";
+        //                }
+        //                else
+        //                {
+        //                    responseMessage = intent.Value + " has been processed on " + entity;
+        //                }
+
+        //                intentMessage = intent.Value;
+        //                return new KeyValuePair<string, string>(intentMessage, responseMessage);
+        //            }
+        //        }
+        //    }
+
+        //    Dictionary<int, string> intentNameDict = intentList.Select(t => new { t.ChatIntentId, t.IntentName }).ToList().ToDictionary(x => x.ChatIntentId, y => y.IntentName);
+        //    LevenshteinDistance dist = new LevenshteinDistance();
+        //    foreach (string vocab in vocabList)
+        //    {
+        //        foreach (KeyValuePair<int, string> intent in intentNameDict)
+        //        {
+        //            if (dist.Compute(vocab, intent.Value) < 4)
+        //            {
+        //                entity = GetEntityforIntent(intent.Key, vocabList);
+        //                if (string.IsNullOrEmpty(entity))
+        //                {
+        //                    responseMessage = intent.Value + " has been processed";
+        //                }
+        //                else
+        //                {
+        //                    responseMessage = intent.Value + " has been processed on " + entity;
+        //                }
+        //                intentMessage = intent.Value;
+        //                return new KeyValuePair<string, string>(intentMessage, responseMessage);
+        //            }
+        //        }
+        //    }
+
+        //    SimilarityCalculator similarityCalculator = new SimilarityCalculator();
+        //    List<ChatIntentQuestion> questionList = db.ChatIntentQuestion.ToList();
+        //    Dictionary<string, int> questions = questionList.Select(t => new { t.QuestionDesc, t.ChatIntentId }).ToList().ToDictionary(x => x.QuestionDesc, y => y.ChatIntentId);
+        //    KeyValuePair<string, int> questionHighestMatch = new KeyValuePair<string, int>();
+        //    double compareHigh = 0;
+        //    foreach (KeyValuePair<string, int> question in questions)
+        //    {
+        //        double compare = similarityCalculator.CompareString(Message, question.Key, 1);
+        //        if (compareHigh < compare)
+        //        {
+        //            compareHigh = compare;
+        //            questionHighestMatch = question;
+        //        }
+        //    }
+
+        //    if (compareHigh > 0)
+        //    {
+        //        string intent = db.ChatIntent.Where(x => x.ChatIntentId == questionHighestMatch.Value).Select(y => y.IntentName).FirstOrDefault();
+        //        entity = GetEntityforIntent(questionHighestMatch.Value, vocabList);
+        //        if (string.IsNullOrEmpty(entity))
+        //        {
+        //            responseMessage = intent + " has been processed";
+        //        }
+        //        else
+        //        {
+        //            responseMessage = intent + " has been processed on " + entity;
+        //        }
+        //        intentMessage = intent;
+        //        return new KeyValuePair<string, string>(intentMessage, responseMessage);
+        //    }
+
+        //    return new KeyValuePair<string, string>(intentMessage, responseMessage);
+        //}
     }
 }

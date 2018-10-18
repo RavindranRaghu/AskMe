@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using ChaT.db;
+using System.Globalization;
 
 namespace ChaT.ai.bLogic
 {
@@ -29,111 +30,6 @@ namespace ChaT.ai.bLogic
             common = new AskMeCommon(Message, Node);
             zPossibleMatch = new AskMezPossibleMatch(Message, Node);
             synonymMatch = new AskMeSynonymMatch(Message, Node);
-        }
-
-        //ChaT Bot Reponse Main Entry
-        public KeyValuePair<string, string> ChatResponse()
-        {
-            string responseMessage = contentManager.NoIntentMatchedResponse;
-            string intentMessage = "NoIntentMatched";
-            string entity = string.Empty;
-            TFIDF getVocab = new TFIDF();
-            Dictionary<string, string> reponseDict = new Dictionary<string, string>();
-
-            if (hiBye.Greet())
-            {
-                return new KeyValuePair<string, string>("greet", contentManager.GreetResponse);
-            }
-            else if (hiBye.GoodBye())
-            {
-                return new KeyValuePair<string, string>("goodbye", contentManager.GoodbyeResponse);
-            }
-
-            List<string> vocabList = getVocab.GetVocabulary(Message);
-
-            List<ChatIntent> intentList = (from intention in db.ChatIntent
-                                           where intention.ChatIntentId > 2 && intention.ParentId == Node
-                                           select intention).ToList();
-
-            foreach (string vocab in vocabList)
-            {
-                var hasIntent = intentList.Where(x=>x.ParentId == Node).Where(x => vocab.Contains(x.IntentName) || x.IntentName.Contains(vocab));
-                if (hasIntent.Any())
-                {
-                    Dictionary<int, string> intentDict = hasIntent.Select(t => new { t.ChatIntentId, t.IntentName}).ToList().ToDictionary(x => x.ChatIntentId, y => y.IntentName);
-                    foreach (KeyValuePair<int, string> intent in intentDict)
-                    {
-                        entity = GetEntityforIntent(intent.Key, vocabList);
-                        if (string.IsNullOrEmpty(entity))
-                        {
-                            responseMessage = intent.Value + " has been processed";
-                        }
-                        else
-                        {
-                            responseMessage = intent.Value + " has been processed on " + entity;
-                        }
-                        
-                        intentMessage = intent.Value;
-                        return new KeyValuePair<string, string>(intentMessage, responseMessage);
-                    }
-                }
-            }
-
-            Dictionary<int, string> intentNameDict = intentList.Select(t => new { t.ChatIntentId, t.IntentName }).ToList().ToDictionary(x => x.ChatIntentId, y => y.IntentName);
-            LevenshteinDistance dist = new LevenshteinDistance();
-            foreach (string vocab in vocabList)
-            {
-                foreach (KeyValuePair< int, string> intent in intentNameDict)
-                {
-                    if (dist.Compute(vocab, intent.Value) < 4)
-                    {
-                        entity = GetEntityforIntent(intent.Key, vocabList);
-                        if (string.IsNullOrEmpty(entity))
-                        {
-                            responseMessage = intent.Value + " has been processed";
-                        }
-                        else
-                        {
-                            responseMessage = intent.Value + " has been processed on " + entity;
-                        }
-                        intentMessage = intent.Value;
-                        return new KeyValuePair<string, string>(intentMessage, responseMessage);
-                    }
-                }
-            }
-
-            SimilarityCalculator similarityCalculator = new SimilarityCalculator();
-            List<ChatIntentQuestion> questionList = db.ChatIntentQuestion.ToList();
-            Dictionary<string, int> questions = questionList.Select(t => new { t.QuestionDesc, t.ChatIntentId }).ToList().ToDictionary(x => x.QuestionDesc, y => y.ChatIntentId);
-            KeyValuePair<string, int> questionHighestMatch = new KeyValuePair<string, int>();
-            double compareHigh = 0;
-            foreach (KeyValuePair<string, int> question in questions)
-            {
-                double compare = similarityCalculator.CompareString(Message, question.Key, 1);
-                if (compareHigh < compare)
-                {
-                    compareHigh = compare;
-                    questionHighestMatch = question;
-                }
-            }
-
-            if (compareHigh > 0)
-            {
-                string intent = db.ChatIntent.Where(x => x.ChatIntentId == questionHighestMatch.Value).Select(y => y.IntentName).FirstOrDefault();
-                entity = GetEntityforIntent(questionHighestMatch.Value, vocabList);
-                if (string.IsNullOrEmpty(entity))
-                {
-                    responseMessage = intent + " has been processed";
-                }
-                else
-                {
-                    responseMessage = intent + " has been processed on " + entity;
-                }
-                intentMessage = intent;
-                return new KeyValuePair<string, string>(intentMessage, responseMessage);
-            }
-
-            return new KeyValuePair<string, string>(intentMessage, responseMessage);
         }
 
         //ChaT Initializer
@@ -180,14 +76,33 @@ namespace ChaT.ai.bLogic
             KeyValuePair<int, bool> fullMatch = suggestionMatch.FullSuggestionMatch(intentList);
             if (fullMatch.Value)
             {
-                responseMessage = intentList.Where(x => x.ChatIntentId == fullMatch.Key).Select(x => x.Response).FirstOrDefault();
+                ChatIntent fullMatchIntent = intentList.Where(x => x.ChatIntentId == fullMatch.Key).FirstOrDefault();
+                responseMessage = fullMatchIntent.Response;
+                var hasEntity = (from ent in db.ChatEntity where ent.ChatIntentId == fullMatchIntent.ChatIntentId
+                                 select ent);
+                if (hasEntity.Any())
+                {
+                    AskMeEntityExtraction entity = new AskMeEntityExtraction(Message, fullMatchIntent.ChatIntentId);
+                    KeyValuePair<int, string> entityIntent = entity.GetEntityforIntentfromNLP();
+                    return entityIntent;
+                }
                 return new KeyValuePair<int, string>(fullMatch.Key, responseMessage);
             }
 
             KeyValuePair<int, bool> partialMatch = suggestionMatch.PartialSuggestionMatch(intentList);
             if (partialMatch.Value)
             {
-                responseMessage = intentList.Where(x => x.ChatIntentId == partialMatch.Key).Select(x => x.Response).FirstOrDefault();
+                ChatIntent partialMatchIntent = intentList.Where(x => x.ChatIntentId == partialMatch.Key).FirstOrDefault();
+                responseMessage = partialMatchIntent.Response;
+                var hasEntity = (from ent in db.ChatEntity
+                                 where ent.ChatIntentId == partialMatchIntent.ChatIntentId
+                                 select ent);
+                if (hasEntity.Any())
+                {
+                    AskMeEntityExtraction entity = new AskMeEntityExtraction(Message, partialMatchIntent.ChatIntentId);
+                    KeyValuePair<int, string> entityIntent = entity.GetEntityforIntentfromNLP();
+                    return entityIntent;
+                }
                 return new KeyValuePair<int, string>(partialMatch.Key, responseMessage);
             }
             #endregion
@@ -195,6 +110,9 @@ namespace ChaT.ai.bLogic
 
             List<string> vocabList = getVocab.GetVocabulary(Message);
             if (vocabList.Count == 0)
+                return new KeyValuePair<int, string>(Node, responseMessage);
+
+            if (Message.ToLower() == "yes" || Message.ToLower() == "no")
                 return new KeyValuePair<int, string>(Node, responseMessage);
 
             #region 3.TFIDF Match Process
@@ -221,10 +139,21 @@ namespace ChaT.ai.bLogic
             if (scoreDict.Where(x => x.Value > 0.45).Any())
             {
                 int maxScoreChatIntentId = scoreDict.OrderByDescending(x => x.Value).Select(y => y.Key).FirstOrDefault();
-                string response = db.ChatIntent.Where(x => x.ChatIntentId == maxScoreChatIntentId).Select(y => y.Response).FirstOrDefault();
-                responseMessage = response;
+                ChatIntent maxIntent = db.ChatIntent.Where(x => x.ChatIntentId == maxScoreChatIntentId).FirstOrDefault();
                 Node = maxScoreChatIntentId;
-                return new KeyValuePair<int, string>(Node, responseMessage);
+
+                var hasEntity = (from ent in db.ChatEntity
+                                 where ent.ChatIntentId == maxIntent.ChatIntentId
+                                 select ent);
+                if (hasEntity.Any())
+                {
+                    AskMeEntityExtraction entity = new AskMeEntityExtraction(Message, maxIntent.ChatIntentId);
+                    KeyValuePair<int, string> entityIntent = entity.GetEntityforIntentfromNLP();
+                    return entityIntent;
+                }
+
+                KeyValuePair<int, string> responseIntent = GetEntityforIntent(Node, maxIntent.Response);
+                return responseIntent;
             }
             else if (scoreDict.Where(x => x.Value >= 0.23).Any())
             {
@@ -273,40 +202,46 @@ namespace ChaT.ai.bLogic
         }
 
 
-        private string GetEntityforIntent(int chatIntentId, List<string> vocabList)
+        private KeyValuePair<int, string> GetEntityforIntent(int chatIntentId, string response)
         {
             string entity = string.Empty;
             List<ChatEntity> entityList = new List<ChatEntity>(); // db.ChatEntity.Where(z => z.ChatIntentId == chatIntentId.ToString()).ToList();
-
-            foreach (string vocab in vocabList)
+            List<string> questionList = db.ChatIntentQuestion.Where(x=>x.ChatIntentId == chatIntentId && x.QuestionDesc.ToLower().Contains("entity") ).Select(y=>y.QuestionDesc).ToList();
+            TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
+            KeyValuePair<int, string> responseIntent = new KeyValuePair<int, string>();
+            foreach (string question in questionList)
             {
-                var hasEntity = entityList.Where(x => vocab.Contains(x.EntityName) || x.EntityName.Contains(vocab));
-                if (hasEntity.Any())
+                string extractedEntityName = string.Empty;
+                string extractedEntityValue = string.Empty;
+                string textPriortoEntityinQuestion = string.Empty;
+                string textPriortoEntityinMessage = string.Empty;
+                int iStart = question.IndexOf("[");
+                int iEnd = question.IndexOf("]");
+                if (iStart != -1 && iEnd != -1)
                 {
-                    List<string> withEntityList = hasEntity.Select(x => x.EntityName).ToList();
-                    foreach (string entityName in withEntityList)
+                    extractedEntityName = question.Substring(iStart + 1, iEnd - iStart - 1);
+                    textPriortoEntityinQuestion = question.Substring(0, iStart);
+                    textPriortoEntityinMessage = Message.Substring(0, iStart);
+                    LevenshteinDistance dist = new LevenshteinDistance();
+                    int matching = dist.Compute(textPriortoEntityinQuestion.ToLower(), textPriortoEntityinMessage.ToLower());
+                    if (matching <= 6)
                     {
-                        entity = entityName;
-                        return entity;
+                        int iStartSpace = textPriortoEntityinMessage.LastIndexOf(" ");
+                        int iEndSpace = Message.IndexOf(",", textPriortoEntityinMessage.Length);
+                        if (iEndSpace == -1)
+                            iEndSpace = Message.Length;
+                        extractedEntityValue = Message.Substring(iStartSpace, iEndSpace-iStartSpace);
+                        extractedEntityValue = textInfo.ToTitleCase(extractedEntityValue);
+                        response = response.Replace(extractedEntityName, extractedEntityValue);
+                        //AskMeOnlineApi online = new AskMeOnlineApi(extractedEntityValue, chatIntentId);
+                        //responseIntent = online.OnlineApiChannel();
+                        break;
                     }
+
                 }
             }
 
-            List<string> entityNames = entityList.Select(x => x.EntityName).ToList();
-            LevenshteinDistance dist = new LevenshteinDistance();
-            foreach (string vocab in vocabList)
-            {
-                foreach (string entityName in entityNames)
-                {
-                    if (dist.Compute(vocab, entityName) < 4)
-                    {
-                        //entity = entityName;
-                        //return entity;
-                    }
-                }
-            }
-
-            return entity;
+            return responseIntent;
         }
     }
 }

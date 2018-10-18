@@ -61,5 +61,18 @@ namespace ChaT.ai.bLogic
             return new KeyValuePair<int,bool>(highestMatchIntent, hasMatch);
         }
 
+
+        public bool PartialSuggestionMatch(string question, string message)
+        {
+            bool hasMatch = false;
+            LevenshteinDistance dist = new LevenshteinDistance();
+            int matching = dist.Compute(question, message);
+            if (matching <= 5)
+            {
+                hasMatch = true;
+            }
+            return hasMatch;
+        }
+
     }
 }

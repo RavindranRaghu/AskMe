@@ -32,6 +32,8 @@ namespace ChaT.ai.bLogic
                 return true;
             else if (Message.Contains("greeting"))
                 return true;
+            else if (Message.ToLower() == "hi")
+                return true;
             else
                 return false;
         }
@@ -43,6 +45,8 @@ namespace ChaT.ai.bLogic
             else if (Message.Contains("good") && Message.Contains("bye"))
                 return true;
             else if (Message.Contains("take") && Message.Contains("care"))
+                return true;
+            else if (Message.Contains("thank"))
                 return true;
             else
                 return false;

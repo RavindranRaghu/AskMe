@@ -21,6 +21,8 @@ namespace ChaT.db
 
         public int ParentId { get; set; }
 
+        //public bool? NeedEntity { get; set; }
+
         [StringLength(2300)]
         [Display(Name = "ChaT Bot Response")]
         public string Response { get; set; }

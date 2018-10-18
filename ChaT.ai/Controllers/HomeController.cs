@@ -19,53 +19,16 @@ namespace ChaT.ai.Controllers
     public class HomeController : Controller
     {
         // GET: Home
-        private ChatDatabaseModel db;        
+        private ChatDatabaseModel db;
         public HomeController()
         {
             db = new ChatDatabaseModel();
         }
 
-        public ActionResult Index()
-        {
-            ViewBag.nodeLevel = 0;
-            ViewBag.Welcome = db.ChatIntent.Where(x => x.ChatIntentId == 0).Select(x => x.Response).FirstOrDefault();
-            List<ChatIntent> intentList = db.ChatIntent.Where(x => x.ParentId == 0 & x.ChatIntentId > 2).ToList();
-            return View(intentList);
-        }
-
-        [HttpGet]
-        public ActionResult Login()
-        {
-            if (Session["loginsuccess"] != null)
-            {
-                if (Session["loginsuccess"].ToString() == "yes")
-                {
-                    return RedirectToAction("Admin");
-                }
-            }
-            return View();
-        }
-
-        [HttpPost]
-        public ActionResult Login(string ud, string pd)
-        {
-            if (ud.ToLower() == "admin" && pd=="1234")
-            {
-                Session["loginsuccess"] = "yes";
-                return RedirectToAction("Admin");
-            }
-            else
-            {
-                Session["loginsuccess"] = "no";
-            }
-
-            return View();
-        }
-
-        public ActionResult Chat(string sender, string message, int node)
+        public ActionResult Chatold(string sender, string message, int node)
         {
             AskMeContentManager contentManager = new AskMeContentManager();
-            if (message.Length>0 )
+            if (message.Length > 0)
             {
                 message = message.Trim();
             }
@@ -75,22 +38,24 @@ namespace ChaT.ai.Controllers
             KeyValuePair<int, string> responseMessage = new KeyValuePair<int, string>();
 
             var hasOneIntentwithEntity = (from inte in db.ChatIntent
-                                      where inte.ParentId == node
-                                      && inte.IntentName.Contains("entity")
-                                      select inte).ToList();
+                                          where inte.ParentId == node
+                                          && inte.IntentName.Contains("entity")
+                                          select inte).ToList();
 
             // Check if Chat has one Intent with Entity
-            if (hasOneIntentwithEntity.Count ==  1)
+            if (hasOneIntentwithEntity.Count == 1)
             {
                 ChatIntent intent = hasOneIntentwithEntity.FirstOrDefault();
                 ChatEntity entity = db.ChatEntity.Where(x => x.ChatIntentId == intent.ChatIntentId).FirstOrDefault();
                 AskMeEntityMatch entityMatch = new AskMeEntityMatch(message, node);
                 EntityIdentifiedDto entityIdentifedDto = new EntityIdentifiedDto();
-                if (entity.EntityName != null){
+                if (entity.EntityName != null)
+                {
                     entityIdentifedDto = entityMatch.HasOneChildIntentWithOneEntity(entity, intent);
                     finalResponse = entityIdentifedDto.ChatResponse;
                 }
-                else{
+                else
+                {
                     finalResponse = intent.Response;
                 }
                 node = intent.ChatIntentId;
@@ -130,6 +95,179 @@ namespace ChaT.ai.Controllers
             }
             var result = new { node = node, response = finalResponse, suggest = suggest };
             return Json(result, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult Chat(string sender, string message, int node)
+        {
+
+            #region Declaration
+            AskMeContentManager contentManager = new AskMeContentManager();
+            AskMeCommon common = new AskMeCommon(message, node);
+            string finalResponse = string.Empty;
+            string phoneNumber = string.Empty;
+            KeyValuePair<int, string> responseMessage = new KeyValuePair<int, string>();
+            #endregion
+
+            #region Prerequsite Check
+            if (common.CheckEmptyMessage())
+            {
+                finalResponse = "Sorry i did not understand";
+                List<string> suggestforEmpty = common.GetSuggestionList();
+                var resultforEmpty = new { node = node, response = finalResponse, suggest = suggestforEmpty };
+                return Json(resultforEmpty, JsonRequestBehavior.AllowGet);
+            }
+            else
+            {
+                message = message.Trim();
+            }
+            #endregion 
+
+            #region Has Only One Intent with Entity
+            var hasEntity = (from inte in db.ChatIntent        
+                             join ent in db.ChatEntity on inte.ChatIntentId equals ent.ChatIntentId
+                             where inte.ChatIntentId == node
+                             select inte).ToList();
+
+            // Check if Chat has one Intent with Entity
+
+            if (hasEntity.Count>0 && Session[node.ToString()] != null)
+            {
+                List<EntityRecognized> entityRecognized = new List<EntityRecognized>();
+                entityRecognized = (List<EntityRecognized>)Session[node.ToString()];
+
+                AskMeEntityExtraction entityMatch = new AskMeEntityExtraction(message, node);
+                KeyValuePair<int, string> oneEntityResponse = new KeyValuePair<int, string>();
+                if (entityRecognized.Where(x => x.EntityName.Contains("PASSCODE")).Any())
+                {
+                    oneEntityResponse = entityMatch.CheckIfAtleastOneEntitywithPasscode(entityRecognized);
+                }
+                else
+                {
+                    oneEntityResponse = entityMatch.CheckIfAtleastOneEntityHasValue(entityRecognized);
+                }
+                finalResponse = oneEntityResponse.Value;
+                node = oneEntityResponse.Key;
+
+                List<string> suggestforEntity = common.GetSuggestionList(node);
+                var resultforEntity = new { node = node, response = finalResponse, suggest = suggestforEntity };
+                return Json(resultforEntity, JsonRequestBehavior.AllowGet);
+            }
+            #endregion
+
+            var hasOneChildIntent = (from inte in db.ChatIntent                                          
+                                          where inte.ParentId == node
+                                          select inte).ToList();
+
+            // Check if Chat has one Intent with Entity
+            if (hasOneChildIntent.Count ==1)
+            {
+                ChatIntent childIntent = hasOneChildIntent.FirstOrDefault();
+
+                var hasOneIntentwithEntity = (from ent in db.ChatEntity
+                                              where ent.ChatIntentId == childIntent.ChatIntentId
+                                              select ent).ToList();
+                if (hasOneIntentwithEntity.Count > 0)
+                {
+                    List<EntityRecognized> entityRecognized = new List<EntityRecognized>();
+                    List<ChatEntity> possibleEntities = hasOneIntentwithEntity;
+                    foreach (ChatEntity entity in possibleEntities)
+                    {
+                        EntityRecognized recognized = new EntityRecognized();
+                        recognized.EntityType = "unrecog";
+                        recognized.EntityName = entity.EntityName;
+                        recognized.EntityValue = entity.EntityDescription;
+                        entityRecognized.Add(recognized);
+                    }
+
+                    AskMeEntityExtraction entityMatch = new AskMeEntityExtraction(message, childIntent.ChatIntentId);
+                    KeyValuePair<int, string> oneEntityResponse = new KeyValuePair<int, string>();
+                    if (entityRecognized.Where(x=>x.EntityName.Contains("PASSCODE")).Any())
+                    {
+                        oneEntityResponse = entityMatch.CheckIfAtleastOneEntitywithPasscode(entityRecognized);
+                    }
+                    else
+                    {
+                        oneEntityResponse = entityMatch.CheckIfAtleastOneEntityHasValue(entityRecognized);
+                    }                                    
+                    finalResponse = oneEntityResponse.Value;
+                    node = oneEntityResponse.Key;
+
+                    List<string> suggestforEntity = common.GetSuggestionList(node);
+                    var resultforEntity = new { node = node, response = finalResponse, suggest = suggestforEntity };
+                    return Json(resultforEntity, JsonRequestBehavior.AllowGet);
+                }
+            }
+
+            #region Main Channel
+            AskMeChannel channel = new AskMeChannel(message, node);
+            responseMessage = channel.ChatInitializer();
+            node = responseMessage.Key;
+            finalResponse = responseMessage.Value;
+
+            if (finalResponse == "triggerpaymentflow") // askpaymentspecialist)
+            {
+                channel = new AskMeChannel("askpaymentspecialist", node);
+                responseMessage = channel.ChatInitializer();
+                node = responseMessage.Key;
+                finalResponse = responseMessage.Value;
+            }
+
+            if (!string.IsNullOrEmpty(finalResponse))
+            {
+                string custName = db.ChatParameter.Where(x => x.ParameterName == "customername").Select(x => x.ParameterValue).FirstOrDefault();
+                finalResponse = finalResponse.Replace("parametercustomername", custName);
+            }
+
+            // Get Suggestions List
+            List<string> suggest = common.GetSuggestionList(node);
+            var result = new { node = node, response = finalResponse, suggest = suggest };
+            return Json(result, JsonRequestBehavior.AllowGet);
+            #endregion
+        }
+
+        public ActionResult Index()
+        {
+            ViewBag.nodeLevel = 0;
+            ViewBag.Welcome = db.ChatIntent.Where(x => x.ChatIntentId == 0).Select(x => x.Response).FirstOrDefault();
+            List<ChatIntent> intentList = db.ChatIntent.Where(x => x.ParentId == 0 & x.ChatIntentId > 2).ToList();
+            return View(intentList);
+        }
+
+        public ActionResult Index1()
+        {
+            ViewBag.nodeLevel = 0;
+            ViewBag.Welcome = db.ChatIntent.Where(x => x.ChatIntentId == 0).Select(x => x.Response).FirstOrDefault();
+            List<ChatIntent> intentList = db.ChatIntent.Where(x => x.ParentId == 0 & x.ChatIntentId > 2).ToList();
+            return View(intentList);
+        }
+
+        [HttpGet]
+        public ActionResult Login()
+        {
+            if (Session["loginsuccess"] != null)
+            {
+                if (Session["loginsuccess"].ToString() == "yes")
+                {
+                    return RedirectToAction("Admin");
+                }
+            }
+            return View();
+        }
+
+        [HttpPost]
+        public ActionResult Login(string ud, string pd)
+        {
+            if (ud.ToLower() == "admin" && pd == "1234")
+            {
+                Session["loginsuccess"] = "yes";
+                return RedirectToAction("Admin");
+            }
+            else
+            {
+                Session["loginsuccess"] = "no";
+            }
+
+            return View();
         }
 
         [AskMeAuthorize()]
@@ -201,13 +339,14 @@ namespace ChaT.ai.Controllers
         {
             List<EntitytDto> entity = (from ent in db.ChatEntity
                                        join intent in db.ChatIntent on ent.ChatIntentId equals intent.ChatIntentId
-                                       select new EntitytDto {
+                                       select new EntitytDto
+                                       {
                                            ChatEntityId = ent.ChatEntityId,
                                            EntityName = ent.EntityName,
                                            EntityDescription = ent.EntityDescription,
                                            ChatIntentId = ent.ChatIntentId,
                                            ChatIntentName = intent.IntentName,
-                                           UpdatedDate =  ent.UpdatedDate
+                                           UpdatedDate = ent.UpdatedDate
                                        }).ToList();
             List<SelectListItem> intents = db.ChatIntent.ToList().Select(u => new SelectListItem
             {
@@ -248,7 +387,7 @@ namespace ChaT.ai.Controllers
             {
                 featureDto.ActualHrs = 0;
             }
-            
+
             return View(featureDto);
         }
 
@@ -365,7 +504,7 @@ namespace ChaT.ai.Controllers
                 }
                 else if (operation == "u")
                 {
-                    finalParam = db.ChatParameter.Where(x => x.ParameterId== param.ParameterId).FirstOrDefault();
+                    finalParam = db.ChatParameter.Where(x => x.ParameterId == param.ParameterId).FirstOrDefault();
                     finalParam.ParameterName = param.ParameterName;
                     finalParam.ParameterValue = param.ParameterValue;
                     finalParam.UpdatedDate = DateTime.Now;
@@ -401,7 +540,7 @@ namespace ChaT.ai.Controllers
             {
                 if (operation == "a")
                 {
-                    entity.EntityName = entitydto.EntityName ;
+                    entity.EntityName = entitydto.EntityName;
                     entity.EntityDescription = entitydto.EntityDescription;
                     entity.ChatIntentId = entitydto.ChatIntentId;
                     entity.UpdatedDate = DateTime.Now;
@@ -435,7 +574,7 @@ namespace ChaT.ai.Controllers
 
         }
 
-        public JsonResult FailReviewUpdate(int questionId, string questionName,int ChatIntentId)
+        public JsonResult FailReviewUpdate(int questionId, string questionName, int ChatIntentId)
         {
             bool changed = true;
             try

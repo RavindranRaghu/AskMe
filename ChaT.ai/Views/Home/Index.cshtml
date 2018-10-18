@@ -4,70 +4,29 @@
     ViewBag.Title = "Home";
 }
 
+
+
 <style>
-
-    .panel-body {
-        height: 600px;
-        overflow-y: auto;
-    }
-
-    .panel-footer {
-        background-color: white;
-        border: none;
-    }
-
-    #chat-history {
-        font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
-        position: absolute;
-        bottom: 120px;
-    }
-
-    .userDiv {
-        padding: 5px;
-        padding-left:80px;
-        max-width: 600px;
-    }
-
-    .userChat {
-        padding: 5px;
-        min-width: 300px;
-        max-width: 500px;
-        display: block;
-        box-shadow: 0 2px 3px -2px gray;
-        border-radius: 15px;
-        padding-left: 10px;
-        background-color: whitesmoke;
-    }
-
-    .botDiv {
-        padding: 5px;
-        padding-left: 5px;
-        max-width: 600px;
-    }
-
-    .botChat {
-        padding: 5px;
-        padding-left: 23px;
-        min-width: 300px;
-        max-width: 500px;
-        display: block;
-        box-shadow: 0 2px 3px -2px gray;
-        border-radius: 15px;
-        background-color: beige;
+    #input-controls {
+        bottom: 10px;
+        position: fixed;
+        max-width:723px;
     }
 
     #message {
-        font-size: x-large;
+        font-size:x-large;
     }
 
-    .glyphicon-user {
-        padding-right: 10px;
-        margin-right: 10px;
-    }
-
-    .glyphicon-bullhorn {
-        padding-right: 10px;
-        margin-right: 10px;
+    #chat-history {
+        overflow-y: auto;
+        border: 2px solid whitesmoke;
+        border-top: none;
+        max-height: 100%;
+        min-height: 100%;
+        font-size: large;
+        font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
     }
 
     .tags {
@@ -93,50 +52,105 @@
         border-radius: 10px;
         box-shadow: 2px 3px whitesmoke;
     }
-
     .navbar-toggle {
         border-color: white !important;
     }
+
+    .bot-message {
+        padding: 5px;
+        margin: 5px 0;
+    }
+
+    /* Clear floats */
+        .bot-message::after {
+            content: "";
+            clear: both;
+            display: table;
+        }
+
+    /* Style images */
+        .bot-message img {
+            float: left;
+            max-width: 35px;
+            width: 100%;
+            margin-top:5px;
+            margin-right: 15px;
+            border-radius: 50%;
+        }
+
+        .bot-message div {
+            background-color: beige;
+            padding: 10px;
+            margin-left: 50px;
+            margin-right:50px;
+            box-shadow: 0 2px 3px -2px gray;
+            border-radius: 10px;
+        }
+
+    .user-message {
+        padding: 5px;
+        padding-right: 23px;
+        margin: 5px 0;
+    }
+
+        /* Clear floats */
+        .user-message::after {
+            content: "";
+            clear: both;
+            display: table;
+        }
+
+        /* Style images */
+        .user-message img {
+            float: left;
+            max-width: 30px;
+            width: 100%;
+            margin-right: 15px;
+            border-radius: 50%;
+        }
+
+        .user-message div {
+            background-color: whitesmoke;
+            float:right;
+            padding: 10px;
+            margin-left: 50px;
+            box-shadow: 0 2px 3px -2px gray;
+            border-radius: 10px;
+        }
 </style>
 
-<div style="padding:10px;">
-    <div class="row">
-        <div class="col-sm-8" style="border:1px solid whitesmoke;padding-left:5px;">
-            <span id="more" style="float:right;" class="glyphicon glyphicon-chevron-up"></span>
-            <div class="panel-body" style="min-height:500px;padding-bottom:150px;">
-                <div id="chat-history"> </div>
+<div class="row" style="padding-top:10px;">
+    <div class="col-md-8">
+        <div id="chat-history">
+            <div class="bot-message">
+                <img src="~/Content/img/Jarvis.png" alt="J">
+                <div>Hello. How are you today?</div>
             </div>
-            <div class="panel-footer">
-                <div>
-                    <div class="input-group">
-                        <input id="node-level" type="hidden" value="@ViewBag.nodeLevel" />
-                        <input id="welcome-message" type="hidden" value="@ViewBag.Welcome" />
+            <div class="user-message">
+                <div>Hello. How are you today?</div>
+            </div>
+            
+        </div>
+        <div id="input-controls">
+            <div id="loadingchat">
+                <img src="~/Content/img/loadchat.gif" />
+                loading...
+            </div>
+            <div class="input-group">
+                <input id="node-level" type="hidden" value="@ViewBag.nodeLevel" />
+                <input id="welcome-message" type="hidden" value="@ViewBag.Welcome" />
+                <input id="message" class="form-control" type="text" style="max-width:100%;height:80px;" placeholder="Type your message" />
+                <span class="input-group-btn">
+                    <button class="btn btn-danger" type="submit" id="saimaa" style="height:80px;width:80px;">
+                        <span class="glyphicon glyphicon-send" style="font-size:x-large"></span>
+                    </button>
+                </span>
+            </div>
+        </div>
 
-                        <input id="message" class="form-control" type="text" style="max-width:600px;height:80px;" />
-                        <span class="input-group-btn">
-                            <button class="btn btn-danger" type="submit" id="saimaa" style="height:80px;width:80px;">
-                                <span class="glyphicon glyphicon-send" style="font-size:x-large"></span>
-                            </button>
-                        </span>
-                    </div>
-                    @*<div class="col-sm-3">
-        </div>
-        <div class="col-sm-3">
-            <div id="controls">
-                <img id="record" src="~/Content/img/mic128.png" onclick="toggleRecording(this);">
-                <img id="loader" src="~/Content/img/loader.gif" />
-                <span id="isaudio" style="display:none"></span>
-                <a id="save" href="#" style="display:none">save</a>
-            </div>
-            <div id="viz" style="display:none">
-                <canvas id="analyser" width="1024" height="500"></canvas>
-                <canvas id="wavedisplay" width="1024" height="500"></canvas>
-            </div>
-        </div>*@
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-4">
+    </div>
+    <div class="col-md-4">
+        <div id="suggestion">
             <div style="padding:23px;">
                 <div class="tag-header">Suggestions:</div>
                 <div id="suggest-list">
@@ -150,15 +164,37 @@
     </div>
 </div>
 
-
 <script>
+
+    $(window).resize(function () {
+        elementResize();
+    });
+
+    function elementResize() {
+        console.log("width:" + $(document).width())
+        console.log("height:" + $(document).height())
+        if ($(document).width() < 700) {
+            $("#suggestion").hide();
+            $("#suggest-list").hide(); 
+        }
+        else {
+            $("#suggestion").show();
+            $("#suggest-list").show();
+        }
+        var height = $(document).height() * .75;
+        $('#chat-history').css('max-height', height + "px");
+        $("#chat-history").height(height);
+    }
+
+
     $(function () {
         $("#more").hide();
+        $("#loadingchat").hide();
         var launchMessage = $("#welcome-message").val();
         var resposeMessage = launchMessage.replace(/<br>/g, "");
         responsiveVoice.speak(resposeMessage);
-        var launchHtml = '<div style="font-size:larger;font-weight:bold;"><span>' + launchMessage + '</span></div>';
-        launchHtml = '<div class="botDiv" ><span class="botChat"><span class="glyphicon glyphicon-bullhorn"> </span>&nbsp<span>' + launchMessage + '</span></span></div>';
+        var launchHtml = '<div class="bot-message"><img src="../Content/img/JarvisNew.png" alt="J"><div>' + launchMessage + '</div></div>';
+        //launchHtml = '<div class="botDiv" ><span class="botChat"><span class="glyphicon glyphicon-bullhorn"> </span>&nbsp<span>' + launchMessage + '</span></span></div>';
         $("#chat-history").html(launchHtml);
 
         $("#message").on("change keyup blur", function () {
@@ -172,19 +208,21 @@
 
 
         $("#saimaa").click(function () {
+            $("#loadingchat").show();
             var message = "  " + $("#message").val();
             var chathtml = $("#chat-history").html();
             var node = $("#node-level").val();
-            chathtml = chathtml + '<div class="userDiv"><span class="userChat"><span class="glyphicon glyphicon-user"> </span>&nbsp<span>' + message + '</span></span></div>';
+            chathtml = chathtml + '<div class="user-message"><div>' + message + '</div></div>';
             var data1 = { sender: "default", message: message, node: node };
             getChatResponse(data1, chathtml);
         });
 
         $(document).on("click", ".tags", function () {
+            $("#loadingchat").show();
             var message = $(this).data("message");
             var chathtml = $("#chat-history").html();
             var node = $("#node-level").val();
-            chathtml = chathtml + '<div class="userDiv"><span class="userChat"><span class="glyphicon glyphicon-user"> </span>&nbsp<span>' + message + '</span></span></div>';
+            chathtml = chathtml + '<div class="user-message"><div>' + message + '</div></div>';
             var data1 = { sender: "default", message: message, node: node };
             getChatResponse(data1, chathtml);
         });
@@ -225,6 +263,8 @@
             $("#more").hide();
         });
 
+        elementResize();
+
     });
 
 
@@ -237,11 +277,11 @@
             contentType: "application/json",
             success: function (data) {
                 //var arr = $.parseJSON(data);
-                $(".panel-body").css("overflow-y", "auto");
+                $("#chat-history").css("overflow-y", "auto");
                 var chatResposeMessage = data.response.replace(/<br>/g, "");
                 var splitResponseMessage = data.response.split("<br>");
                 splitResponseMessage.forEach(function (splitMessage) {
-                    chathtml = chathtml + '<div class="botDiv" ><span class="botChat"><span class="glyphicon glyphicon-bullhorn"> </span>&nbsp<span>' + splitMessage + '</span></span></div>';
+                    chathtml = chathtml + '<div class="bot-message"><img src="../Content/img/JarvisNew.png" alt="J"><div>' + splitMessage + '</div></div>';
                 });
                 responsiveVoice.speak(chatResposeMessage);
                 //chathtml = chathtml + '<div class="botDiv" ><span class="botChat"><span class="glyphicon glyphicon-bullhorn"> </span>&nbsp<span>' + data.response + '</span></span></div>';
@@ -262,12 +302,13 @@
 
                 var objDiv = document.getElementById("chat-history");
                 //
-                $(".panel-body").animate({
-                    scrollTop: $('.panel-body')[0].scrollHeight - $('.panel-body').height()
+                $("#chat-history").animate({
+                    scrollTop: $('#chat-history')[0].scrollHeight - $('#chat-history').height()
                 }, objDiv.scrollHeight);
                 objDiv.scrollTop = objDiv.scrollHeight;
-                $(".panel-body").css("overflow-y", "hidden");
+                $("#chat-history").css("overflow-y", "hidden");
                 $("#more").show();
+                $("#loadingchat").hide();
             },
             error: function (xhr, textStatus, error) {
 
@@ -275,9 +316,5 @@
             }
         });
     }
-
 </script>
-@*<script src="~/Scripts/audio-display.js"></script>
-<script src="~/Scripts/audio-recorder.js"></script>
-<script src="~/Scripts/audio-recordworker.js"></script>
-<script src="~/Scripts/audio-main.js"></script>*@
+

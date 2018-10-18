@@ -12,4 +12,11 @@ namespace ChaT.ai.Dto
         public string ChatResponse { get; set; }
         public string MatchConfidence { get; set; }        
     }
+
+    public class EntityRecognized
+    {
+        public string EntityType { get; set; }
+        public string EntityName { get; set; }
+        public string EntityValue { get; set; }
+    }
 }

@@ -13,7 +13,7 @@ namespace ChaT.ai.cAuth
             bool disableAuthentication = false;
 
             #if DEBUG
-                        //disableAuthentication = true;
+                   disableAuthentication = true;
             #endif
 
             if (disableAuthentication)

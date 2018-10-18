@@ -51,5 +51,56 @@ namespace ChaT.ai.bLogic
                 return false;
         }
 
+        public List<string> GetSuggestionList(int NewNode)
+        {
+            List<string> suggest = new List<string>();
+            var hasSuggest = db.ChatIntent.Where(x => x.ParentId == NewNode && x.ChatIntentId > 2).Select(y => y.IntentDescription);
+            if (hasSuggest.Any())
+            {
+                suggest = hasSuggest.ToList();
+            }
+            else
+            {
+                suggest = db.ChatIntent.Where(x => x.ParentId == 0 && x.ChatIntentId > 2).Select(y => y.IntentDescription).ToList();
+            }
+
+            return suggest;
+        }
+
+        public List<string> GetSuggestionList()
+        {
+            List<string> suggest = new List<string>();
+            var hasSuggest = db.ChatIntent.Where(x => x.ParentId == Node && x.ChatIntentId > 2).Select(y => y.IntentDescription);
+            if (hasSuggest.Any())
+            {
+                suggest = hasSuggest.ToList();
+            }
+            else
+            {
+                suggest = db.ChatIntent.Where(x => x.ParentId == 0 && x.ChatIntentId > 2).Select(y => y.IntentDescription).ToList();
+            }
+
+            return suggest;
+        }
+
+        public bool CheckEmptyMessage()
+        {
+            bool isEmpty = false;
+            string message = Message;
+            if (message.Length == 0)
+            {
+                isEmpty = true;
+            }
+            else if (message.Length > 0)
+            {
+                message = message.Trim();
+                if (message.Length == 0)
+                {
+                    isEmpty = true;
+                }
+            }
+            return isEmpty;
+        }
+
     }
 }
