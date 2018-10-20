@@ -241,6 +241,14 @@ namespace ChaT.ai.Controllers
             return View(intentList);
         }
 
+        public ActionResult Index2()
+        {
+            ViewBag.nodeLevel = 0;
+            ViewBag.Welcome = db.ChatIntent.Where(x => x.ChatIntentId == 0).Select(x => x.Response).FirstOrDefault();
+            List<ChatIntent> intentList = db.ChatIntent.Where(x => x.ParentId == 0 & x.ChatIntentId > 2).ToList();
+            return View(intentList);
+        }
+
         [HttpGet]
         public ActionResult Login()
         {

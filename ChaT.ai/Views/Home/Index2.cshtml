@@ -1,0 +1,320 @@
+﻿@model IEnumerable<ChaT.db.ChatIntent>
+
+@{
+    ViewBag.Title = "Home";
+}
+
+
+
+<style>
+    #input-controls {
+        bottom: 10px;
+        position: fixed;
+        max-width:723px;
+    }
+
+    #message {
+        font-size:x-large;
+    }
+
+    #chat-history {
+        overflow-y: auto;
+        border: 2px solid whitesmoke;
+        border-top: none;
+        max-height: 100%;
+        min-height: 100%;
+        font-size: large;
+        font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+    }
+
+    .tags {
+        text-align: left;
+        color: crimson;
+        border-radius: 10px;
+        font-size: large;
+    }
+
+    .tag-header {
+        font-size: x-large;
+        color: crimson;
+        padding-top: 30px;
+        padding-bottom: 10px;
+    }
+
+    .tag-body {
+        margin: 5px;
+        padding: 5px;
+        margin-bottom: 10px;
+        padding-left: 10px;
+        background-color: whitesmoke;
+        border-radius: 10px;
+        box-shadow: 2px 3px whitesmoke;
+    }
+    .navbar-toggle {
+        border-color: white !important;
+    }
+
+    .bot-message {
+        padding: 5px;
+        margin: 5px 0;
+    }
+
+    /* Clear floats */
+        .bot-message::after {
+            content: "";
+            clear: both;
+            display: table;
+        }
+
+    /* Style images */
+        .bot-message img {
+            float: left;
+            max-width: 35px;
+            width: 100%;
+            margin-top:5px;
+            margin-right: 15px;
+            border-radius: 50%;
+        }
+
+        .bot-message div {
+            background-color: beige;
+            padding: 10px;
+            margin-left: 50px;
+            margin-right:50px;
+            box-shadow: 0 2px 3px -2px gray;
+            border-radius: 10px;
+        }
+
+    .user-message {
+        padding: 5px;
+        padding-right: 23px;
+        margin: 5px 0;
+    }
+
+        /* Clear floats */
+        .user-message::after {
+            content: "";
+            clear: both;
+            display: table;
+        }
+
+        /* Style images */
+        .user-message img {
+            float: left;
+            max-width: 30px;
+            width: 100%;
+            margin-right: 15px;
+            border-radius: 50%;
+        }
+
+        .user-message div {
+            background-color: whitesmoke;
+            float:right;
+            padding: 10px;
+            margin-left: 50px;
+            box-shadow: 0 2px 3px -2px gray;
+            border-radius: 10px;
+        }
+</style>
+
+<div class="row" style="padding-top:10px;">
+    <div class="col-md-8">
+        <div id="chat-history">
+            <div class="bot-message">
+                <img src="~/Content/img/Jarvis.png" alt="J">
+                <div>Hello. How are you today?</div>
+            </div>
+            <div class="user-message">
+                <div>Hello. How are you today?</div>
+            </div>
+            
+        </div>
+        <div id="input-controls">
+            <div id="loadingchat">
+                <img src="~/Content/img/loadchat.gif" />
+                loading...
+            </div>
+            <div class="input-group">
+                <input id="node-level" type="hidden" value="@ViewBag.nodeLevel" />
+                <input id="welcome-message" type="hidden" value="@ViewBag.Welcome" />
+                <input id="message" class="form-control" type="text" style="max-width:100%;height:80px;" placeholder="Type your message" />
+                <span class="input-group-btn">
+                    <button class="btn btn-danger" type="submit" id="saimaa" style="height:80px;width:80px;">
+                        <span class="glyphicon glyphicon-send" style="font-size:x-large"></span>
+                    </button>
+                </span>
+            </div>
+        </div>
+
+    </div>
+    <div class="col-md-4">
+        <div id="suggestion">
+            <div style="padding:23px;">
+                <div class="tag-header">Suggestions:</div>
+                <div id="suggest-list">
+                    @foreach (var item in Model)
+                    {
+                        <div class="tag-body"><div class="tags" data-message="@item.IntentDescription">@item.IntentDescription</div></div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    $(window).resize(function () {
+        elementResize();
+    });
+
+    function elementResize() {
+        console.log("width:" + $(document).width())
+        console.log("height:" + $(document).height())
+        if ($(document).width() < 700) {
+            $("#suggestion").hide();
+            $("#suggest-list").hide(); 
+        }
+        else {
+            $("#suggestion").show();
+            $("#suggest-list").show();
+        }
+        var height = $(document).height() * .75;
+        $('#chat-history').css('max-height', height + "px");
+        $("#chat-history").height(height);
+    }
+
+
+    $(function () {
+        $("#more").hide();
+        $("#loadingchat").hide();
+        var launchMessage = $("#welcome-message").val();
+        var resposeMessage = launchMessage.replace(/<br>/g, "");
+        responsiveVoice.speak(resposeMessage);
+        var launchHtml = '<div class="bot-message"><img src="../Content/img/JarvisNew.png" alt="J"><div>' + launchMessage + '</div></div>';
+        //launchHtml = '<div class="botDiv" ><span class="botChat"><span class="glyphicon glyphicon-bullhorn"> </span>&nbsp<span>' + launchMessage + '</span></span></div>';
+        $("#chat-history").html(launchHtml);
+
+        $("#message").on("change keyup blur", function () {
+            if ($("#message").val().length > 0) {
+                $("#saimaa").attr("disabled", false);
+            }
+            else {
+                $("#saimaa").attr("disabled", true);
+            }
+        });
+
+
+        $("#saimaa").click(function () {
+            $("#loadingchat").show();
+            var message = "  " + $("#message").val();
+            var chathtml = $("#chat-history").html();
+            var node = $("#node-level").val();
+            chathtml = chathtml + '<div class="user-message"><div>' + message + '</div></div>';
+            var data1 = { sender: "default", message: message, node: node };
+            getChatResponse(data1, chathtml);
+        });
+
+        $(document).on("click", ".tags", function () {
+            $("#loadingchat").show();
+            var message = $(this).data("message");
+            var chathtml = $("#chat-history").html();
+            var node = $("#node-level").val();
+            chathtml = chathtml + '<div class="user-message"><div>' + message + '</div></div>';
+            var data1 = { sender: "default", message: message, node: node };
+            getChatResponse(data1, chathtml);
+        });
+
+        $(".tags").click(function () {
+
+        });
+
+
+        // Get the input field
+        var input = document.getElementById("message");
+
+        // Execute a function when the user releases a key on the keyboard
+        input.addEventListener("keyup", function (event) {
+            // Cancel the default action, if needed
+            event.preventDefault();
+            // Number 13 is the "Enter" key on the keyboard
+            if (event.keyCode === 13) {
+                // Trigger the button element with a click
+                document.getElementById("saimaa").click();
+            }
+        });
+
+        $("#loader").hide();
+        $("#record").click(function () {
+            if ($("#isaudio").text() == "recording") {
+                $("#isaudio").text("");
+                $("#loader").hide();
+            }
+            else {
+                $('#isaudio').text("recording");
+                $("#loader").show();
+            }
+        });
+
+        $("#more").click(function () {
+            $(".panel-body").css("overflow-y", "auto");
+            $("#more").hide();
+        });
+
+        elementResize();
+
+    });
+
+
+    function getChatResponse(data1, chathtml) {
+        $.ajax({
+            url: "/Home/Chat",
+            type: "POST",
+            data: JSON.stringify(data1),
+            dataType: "json",
+            contentType: "application/json",
+            success: function (data) {
+                //var arr = $.parseJSON(data);
+                $("#chat-history").css("overflow-y", "auto");
+                var chatResposeMessage = data.response.replace(/<br>/g, "");
+                var splitResponseMessage = data.response.split("<br>");
+                splitResponseMessage.forEach(function (splitMessage) {
+                    chathtml = chathtml + '<div class="bot-message"><img src="../Content/img/JarvisNew.png" alt="J"><div>' + splitMessage + '</div></div>';
+                });
+                responsiveVoice.speak(chatResposeMessage);
+                //chathtml = chathtml + '<div class="botDiv" ><span class="botChat"><span class="glyphicon glyphicon-bullhorn"> </span>&nbsp<span>' + data.response + '</span></span></div>';
+                //chathtml = chathtml + '<p style="float:right"><div >Bot says:</div><div>' + data + '</div></p>';
+                $("#chat-history").html(chathtml);
+                $("#node-level").val(data.node);
+                $("#message").val("");
+                var suggestions = data.suggest;
+                var suggestHtml = "";
+                suggestions.forEach(function (element) {
+                    suggestHtml = suggestHtml + '<div class="tag-body" style="padding-top: 10px;"><div class="tags" data-message="' + element + '">' + element + '</div></div>';
+                });
+                $("#suggest-list").html('<div style="padding-left:23px;"><img src="../Content/img/loader.gif" /><div>');
+                setTimeout(function () {
+                    $("#suggest-list").html(suggestHtml);
+                    $("#suggest-list").show('fadeIn', {}, 500)
+                }, 500);
+
+                var objDiv = document.getElementById("chat-history");
+                //
+                $("#chat-history").animate({
+                    scrollTop: $('#chat-history')[0].scrollHeight - $('#chat-history').height()
+                }, objDiv.scrollHeight);
+                objDiv.scrollTop = objDiv.scrollHeight;
+                $("#chat-history").css("overflow-y", "hidden");
+                $("#more").show();
+                $("#loadingchat").hide();
+            },
+            error: function (xhr, textStatus, error) {
+
+                console.log("Response " + error);
+            }
+        });
+    }
+</script>
+
