@@ -158,8 +158,7 @@
             </div>
             <div id="input-controls">
                 <div id="loadingchat">
-                    <img src="~/Content/img/loadchat.gif" />
-                    loading...
+                    <img src="~/Content/img/loadchat.gif" style="float:right;" /><span>loading...</span>                    
                 </div>
                 <div class="input-group">
                     <input id="node-level" type="hidden" value="@ViewBag.nodeLevel" />
@@ -334,6 +333,12 @@
                         $("#suggest-list").html(suggestHtml);
                         $("#suggest-list").show('fadeIn', {}, 500)
                     }, 500);
+
+                    var suggestAltHtml = '<span class="tag-header">Suggestions:</span>';
+                    suggestions.forEach(function (element) {
+                        suggestAltHtml = suggestAltHtml + '<span class="tag-body"><span class="tags-alt">' + element + '</span></span>';
+                    });
+                    $("#suggest-list-alt").html(suggestAltHtml);
 
                     var objDiv = document.getElementById("chat-history");
                     //
