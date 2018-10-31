@@ -52,11 +52,12 @@ namespace ChaT.ai.bLogic
             return new KeyValuePair<int, string>(respondIntent.ChatIntentId, respondIntent.Response);
         }
 
-        public KeyValuePair<int, string> OnlineApiChannelforNLP(ChatIntent intent, List<EntityRecognized> entityList)
+        public KeyValuePair<int, string> OnlineApiChannelforNLP(ChatIntent intent, List<ChatSessionEntity> entityList)
         {
             string response = string.Empty;
             ChatIntent respondIntent = new ChatIntent();
             HttpContext httpContext = HttpContext.Current;
+            int sessionId = entityList.Select(x => x.SessionId).FirstOrDefault();
 
             if (intent.IntentName.Trim() == "ChangeAddressMeIntent")
             {
@@ -89,6 +90,14 @@ namespace ChaT.ai.bLogic
             }
 
             httpContext.Session[intent.ChatIntentId.ToString()] = null;
+            List<ChatSessionEntity> recognizedList = db.ChatSessionEntity.Where(x => x.SessionId == sessionId).ToList();
+
+            foreach (ChatSessionEntity chatEntity in recognizedList)
+            {
+                chatEntity.EntityType = "recog";                
+            }
+            db.SaveChanges();
+
             foreach (var recog in entityList)
             {
                 respondIntent.Response = respondIntent.Response.Replace(recog.EntityName, recog.EntityValue);

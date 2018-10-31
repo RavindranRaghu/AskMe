@@ -91,7 +91,7 @@ $(function () {
         var finalProject = { subfeature: project, operation: operation };
         $.ajax({
             type: "POST",
-            url: "/home/SubFeatureUpdate/",
+            url: "/admin/SubFeatureUpdate/",
             data: JSON.stringify(finalProject),
             contentType: "application/json; charset=utf-8",
             dataType: "json",

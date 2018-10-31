@@ -77,7 +77,7 @@ $(function () {
         var finalProject = { feature: project, operation: operation };
         $.ajax({
             type: "POST",
-            url: "/home/FeatureUpdate/",
+            url: "/admin/FeatureUpdate/",
             data: JSON.stringify(finalProject),
             contentType: "application/json; charset=utf-8",
             dataType: "json",

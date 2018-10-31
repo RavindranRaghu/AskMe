@@ -87,6 +87,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ChatDatabaseModel.cs" />
+    <Compile Include="ChatSessionEntity.cs" />
+    <Compile Include="ChatSession.cs" />
     <Compile Include="ChatEntity.cs" />
     <Compile Include="ChatFailureResponse.cs" />
     <Compile Include="ChatSubFeatureList.cs" />

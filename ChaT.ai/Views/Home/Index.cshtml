@@ -161,8 +161,9 @@
                     <img src="~/Content/img/loadchat.gif" style="float:right;" /><span>loading...</span>                    
                 </div>
                 <div class="input-group">
-                    <input id="node-level" type="hidden" value="@ViewBag.nodeLevel" />
-                    <input id="welcome-message" type="hidden" value="@ViewBag.Welcome" />
+                    <input id="node-level" type="hidden" value="" />
+                    <input id="welcome-message" type="hidden" value="" />
+                    <input id="session-id" type="hidden" value="" />
                     <input id="message" class="form-control" type="text" placeholder="Type your message" />
                     <span class="input-group-btn">
                         <button class="btn btn-danger" type="submit" id="saimaa">
@@ -186,11 +187,15 @@
             </div>
             <div id="suggestionAlt">                
                 <div id="suggest-list-alt">
-                    <span class="tag-header">Suggestions:</span>
-                    @foreach (var item in Model)
-                    {
-                    <span class="tag-body"><a class="tags-alt" data-message="@item.IntentDescription">@item.IntentDescription</a></span>
-                    }
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <span class="tag-header">Suggestions:</span>
+                            @foreach (var item in Model)
+                            {
+                                <span class="tag-body"><a class="tags-alt" data-message="@item.IntentDescription">@item.IntentDescription</a></span>
+                            }
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -203,8 +208,8 @@
 
         $(function () {
             elementResize();
-
-            $("#more").hide();
+            startChat();
+            //$("#more").hide();
             $("#loadingchat").hide();
             var launchMessage = $("#welcome-message").val();
             var resposeMessage = launchMessage.replace(/<br>/g, "");
@@ -228,8 +233,9 @@
                 var message = "  " + $("#message").val();
                 var chathtml = $("#chat-history").html();
                 var node = $("#node-level").val();
+                var sessionId = $("#session-id").val();
                 chathtml = chathtml + '<div class="user-message"><div>' + message + '</div></div>';
-                var data1 = { sender: "default", message: message, node: node };
+                var data1 = { sessionId: sessionId, message: message, node: node };
                 getChatResponse(data1, chathtml);
             });
 
@@ -302,6 +308,62 @@
             $("#input-controls").width($("#chat-history").width());
         }
 
+        function startChat() {
+            $.ajax({
+                url: "/Home/StartChat",
+                type: "POST",
+                //data: JSON.stringify(data1),
+                dataType: "json",
+                contentType: "application/json",
+                success: function (data) {
+                    var chathtml = "";
+                    $("#chat-history").css("overflow-y", "auto");
+                    var chatResposeMessage = data.response.replace(/<br>/g, "");
+                    var splitResponseMessage = data.response.split("<br>");
+                    splitResponseMessage.forEach(function (splitMessage) {
+                        chathtml = chathtml + '<div class="bot-message"><img src="../Content/img/JarvisNew.png" alt="J"><div>' + splitMessage + '</div></div>';
+                    });
+                    responsiveVoice.speak(chatResposeMessage);
+                    //chathtml = chathtml + '<div class="botDiv" ><span class="botChat"><span class="glyphicon glyphicon-bullhorn"> </span>&nbsp<span>' + data.response + '</span></span></div>';
+                    //chathtml = chathtml + '<p style="float:right"><div >Bot says:</div><div>' + data + '</div></p>';
+                    $("#chat-history").html(chathtml);
+                    $("#node-level").val(data.node);
+                    $("#session-id").val(data.sessionId);
+                    $("#message").val("");
+                    var suggestions = data.suggest;
+                    var suggestHtml = "";
+                    suggestions.forEach(function (element) {
+                        suggestHtml = suggestHtml + '<div class="tag-body" style="padding-top: 10px;"><div class="tags" data-message="' + element + '">' + element + '</div></div>';
+                    });
+                    $("#suggest-list").html('<div style="padding-left:23px;"><img src="../Content/img/loader.gif" /><div>');
+                    setTimeout(function () {
+                        $("#suggest-list").html(suggestHtml);
+                        $("#suggest-list").show('fadeIn', {}, 500)
+                    }, 500);
+
+                    var suggestAltHtml = '<span class="tag-header">Suggestions:</span>';
+                    suggestions.forEach(function (element) {
+                        suggestAltHtml = suggestAltHtml + '<span class="tag-body"><span class="tags-alt">' + element + '</span></span>';
+                    });
+                    $("#suggest-list-alt").html(suggestAltHtml);
+
+                    var objDiv = document.getElementById("chat-history");
+                    //
+                    $("#chat-history").animate({
+                        scrollTop: $('#chat-history')[0].scrollHeight - $('#chat-history').height()
+                    }, objDiv.scrollHeight);
+                    objDiv.scrollTop = objDiv.scrollHeight;
+                    $("#chat-history").css("overflow-y", "hidden");
+                    //$("#more").show();
+                    $("#loadingchat").hide();
+                },
+                error: function (xhr, textStatus, error) {
+
+                    console.log("Response " + error);
+                }
+            });
+        }
+
         function getChatResponse(data1, chathtml) {
             $.ajax({
                 url: "/Home/Chat",
@@ -347,7 +409,7 @@
                     }, objDiv.scrollHeight);
                     objDiv.scrollTop = objDiv.scrollHeight;
                     $("#chat-history").css("overflow-y", "hidden");
-                    $("#more").show();
+                    //$("#more").show();
                     $("#loadingchat").hide();
                 },
                 error: function (xhr, textStatus, error) {

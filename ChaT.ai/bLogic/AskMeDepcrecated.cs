@@ -231,5 +231,79 @@ namespace ChaT.ai.bLogic
 
         //    return new KeyValuePair<string, string>(intentMessage, responseMessage);
         //}
+
+
+        //public ActionResult Chatold(string sender, string message, int node)
+        //{
+        //    AskMeContentManager contentManager = new AskMeContentManager();
+        //    if (message.Length > 0)
+        //    {
+        //        message = message.Trim();
+        //    }
+        //    message = message.ToLower();
+        //    string finalResponse = string.Empty;
+        //    string phoneNumber = string.Empty;
+        //    KeyValuePair<int, string> responseMessage = new KeyValuePair<int, string>();
+
+        //    var hasOneIntentwithEntity = (from inte in db.ChatIntent
+        //                                  where inte.ParentId == node
+        //                                  && inte.IntentName.Contains("entity")
+        //                                  select inte).ToList();
+
+        //    // Check if Chat has one Intent with Entity
+        //    if (hasOneIntentwithEntity.Count == 1)
+        //    {
+        //        ChatIntent intent = hasOneIntentwithEntity.FirstOrDefault();
+        //        ChatEntity entity = db.ChatEntity.Where(x => x.ChatIntentId == intent.ChatIntentId).FirstOrDefault();
+        //        AskMeEntityMatch entityMatch = new AskMeEntityMatch(message, node);
+        //        EntityIdentifiedDto entityIdentifedDto = new EntityIdentifiedDto();
+        //        if (entity.EntityName != null)
+        //        {
+        //            entityIdentifedDto = entityMatch.HasOneChildIntentWithOneEntity(entity, intent);
+        //            finalResponse = entityIdentifedDto.ChatResponse;
+        //        }
+        //        else
+        //        {
+        //            finalResponse = intent.Response;
+        //        }
+        //        node = intent.ChatIntentId;
+        //    }
+        //    else // 
+        //    {
+        //        AskMeChannel channel = new AskMeChannel(message, node);
+        //        responseMessage = channel.ChatInitializer();
+        //        node = responseMessage.Key;
+        //        finalResponse = responseMessage.Value;
+
+        //        if (finalResponse == "triggerpaymentflow") // askpaymentspecialist)
+        //        {
+        //            channel = new AskMeChannel("askpaymentspecialist", node);
+        //            responseMessage = channel.ChatInitializer();
+        //            node = responseMessage.Key;
+        //            finalResponse = responseMessage.Value;
+        //        }
+
+        //        if (!string.IsNullOrEmpty(finalResponse))
+        //        {
+        //            string custName = db.ChatParameter.Where(x => x.ParameterName == "customername").Select(x => x.ParameterValue).FirstOrDefault();
+        //            finalResponse = finalResponse.Replace("parametercustomername", custName);
+        //        }
+        //    }
+
+        //    // Get Suggestions List
+        //    List<string> suggest = new List<string>();
+        //    var hasSuggest = db.ChatIntent.Where(x => x.ParentId == node && x.ChatIntentId > 2).Select(y => y.IntentDescription);
+        //    if (hasSuggest.Any())
+        //    {
+        //        suggest = hasSuggest.ToList();
+        //    }
+        //    else
+        //    {
+        //        suggest = db.ChatIntent.Where(x => x.ParentId == 0 && x.ChatIntentId > 2).Select(y => y.IntentDescription).ToList();
+        //    }
+        //    var result = new { node = node, response = finalResponse, suggest = suggest };
+        //    return Json(result, JsonRequestBehavior.AllowGet);
+        //}
+
     }
 }

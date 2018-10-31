@@ -54,14 +54,14 @@ namespace ChaT.ai.bLogic
         public List<string> GetSuggestionList(int NewNode)
         {
             List<string> suggest = new List<string>();
-            var hasSuggest = db.ChatIntent.Where(x => x.ParentId == NewNode && x.ChatIntentId > 2).Select(y => y.IntentDescription);
+            var hasSuggest = db.ChatIntent.Where(x => x.ParentId == NewNode && x.ChatIntentId > 2 & !x.IsRedirect).Select(y => y.IntentDescription);
             if (hasSuggest.Any())
             {
                 suggest = hasSuggest.ToList();
             }
             else
             {
-                suggest = db.ChatIntent.Where(x => x.ParentId == 0 && x.ChatIntentId > 2).Select(y => y.IntentDescription).ToList();
+                suggest = db.ChatIntent.Where(x => x.ParentId == 0 && x.ChatIntentId > 2 & !x.IsRedirect).Select(y => y.IntentDescription).ToList();
             }
 
             return suggest;
@@ -70,14 +70,14 @@ namespace ChaT.ai.bLogic
         public List<string> GetSuggestionList()
         {
             List<string> suggest = new List<string>();
-            var hasSuggest = db.ChatIntent.Where(x => x.ParentId == Node && x.ChatIntentId > 2).Select(y => y.IntentDescription);
+            var hasSuggest = db.ChatIntent.Where(x => x.ParentId == Node && x.ChatIntentId > 2 & !x.IsRedirect).Select(y => y.IntentDescription);
             if (hasSuggest.Any())
             {
                 suggest = hasSuggest.ToList();
             }
             else
             {
-                suggest = db.ChatIntent.Where(x => x.ParentId == 0 && x.ChatIntentId > 2).Select(y => y.IntentDescription).ToList();
+                suggest = db.ChatIntent.Where(x => x.ParentId == 0 && x.ChatIntentId > 2 & !x.IsRedirect).Select(y => y.IntentDescription).ToList();
             }
 
             return suggest;

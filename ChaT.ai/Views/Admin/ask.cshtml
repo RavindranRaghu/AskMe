@@ -1,11 +1,28 @@
-﻿@model IEnumerable<ChaT.ai.Dto.EntitytDto>
+﻿@model IEnumerable<ChaT.ai.Dto.AskDto>
 
 @{
-    ViewBag.Title = "Entity";
+    ViewBag.Title = "ChatQuestion";
     List<SelectListItem> intents = ViewBag.intents as List<SelectListItem>;
 }
 
+<link rel="stylesheet" type="text/css" href="~/Content/jquery.dataTables.min.css" />
+<script type="text/javascript" src="~/Scripts/jquery.dataTables.min.js"></script>
+
+
 <style>
+
+    table.dataTable thead .sorting_asc {
+        background: url("../Content/img/sort_asc.png") no-repeat center right;
+    }
+
+    table.dataTable thead .sorting {
+        background: url("../Content/img/sort_both.png") no-repeat center right;
+    }
+
+    table.dataTable thead .sorting_desc {
+        background: url("../Content/img/sort_desc.png") no-repeat center right;
+    }
+
     .form-control {
         margin-bottom: 10px;
     }
@@ -17,66 +34,55 @@
 <div style="padding-top:23px;">
     @Html.Partial("_AdminPartial")
 </div>
-
 <div style="padding-top:15px;">
-    <span class="page-subheader">Entity</span>
-    <button type="button" class="btn btn-link newProject"
-            data-toggle="modal"
-            data-target="#projectModal">
+    <span class="page-subheader">Questions</span>
+    <button type="button" class="btnEdit btn btn-link newProject"
+            data-toggle="modal" data-target="#projectModal">
         Create
     </button>
 </div>
 
-<table class="table">
-    <tr>
-        <th>
-            @Html.DisplayNameFor(model => model.EntityName)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.EntityDescription)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.ChatIntentId)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.UpdatedDate)
-        </th>
-        <th>
-            Edit
-        </th>
-        <th>
-            Delete
-        </th>
-    </tr>
-
+<table class="table" id="questionTable">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.QuestionId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.QuestionDesc)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ChatIntentName)
+            </th>
+            <th>Edit</th>
+            <th>Delete</th>
+        </tr>
+    </thead>
     @foreach (var item in Model)
     {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.EntityName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.EntityDescription)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ChatIntentId)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.UpdatedDate)
-            </td>
-            <td>
-                <button type="button" class="btn btn-default glyphicon glyphicon-edit openExistingProject"
-                        data-toggle="modal" data-id=@item.ChatEntityId data-name="@item.EntityName" data-desc="@item.EntityDescription" data-intentid="@item.ChatIntentId" data-intentname="@item.ChatIntentName" data-lastupdated="@item.UpdatedDate" data-target="#projectModal"></button>
-            </td>
-            <td>
-                <button type="button" class="btn btn-default glyphicon glyphicon-trash deleteExistingProject"
-                        data-toggle="modal" data-id=@item.ChatEntityId data-name="@item.EntityName" data-desc="@item.EntityDescription" data-intentid="@item.ChatIntentId" data-intentname="@item.ChatIntentName" data-lastupdated="@item.UpdatedDate" data-target="#projectModal"></button>
-            </td>
-        </tr>
+        <tbody>
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.QuestionId)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.QuestionDesc)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ChatIntentName)
+                </td>
+                <td>
+                    <button type="button" class="btn btn-default glyphicon glyphicon-edit openExistingProject"
+                            data-toggle="modal" data-id=@item.QuestionId data-name="@item.QuestionDesc" data-intentid="@item.ChatIntentId" data-intentname="@item.ChatIntentName" data-lastupdated="@item.UpdatedDate" data-target="#projectModal"></button>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-default glyphicon glyphicon-trash deleteExistingProject"
+                            data-toggle="modal" data-id=@item.QuestionId data-name="@item.QuestionDesc" data-intentid="@item.ChatIntentId" data-intentname="@item.ChatIntentName" data-lastupdated="@item.UpdatedDate" data-target="#projectModal"></button>
+                </td>
+            </tr>
+        </tbody>
     }
-
 </table>
-
 
 
 <div id="projectModal" class="modal fade" role="dialog">
@@ -85,24 +91,19 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="appHeading">Entity</h4>
+                <h4 class="appHeading">Question</h4>
                 <div><span style="color:dodgerblue" id="lastUpdated"></span></div>
             </div>
 
             <div class="modal-body">
-                <input type="hidden" id="entityId" />
+                <input type="hidden" id="questionId" />
                 <input type="hidden" id="intentId" />
                 <input type="hidden" id="operation" />
                 <input type="hidden" id="table-reload" value="n" />
 
                 <div class="row">
-                    <div class="col-sm-2">Entity Name</div>
-                    <div class="col-sm-10"><input type="text" class="form-control" id="entityName" /></div>
-                </div>
-
-                <div class="row">
-                    <div class="col-sm-2">Entity Desc</div>
-                    <div class="col-sm-10"><input type="text" class="form-control" id="entityDesc" /></div>
+                    <div class="col-sm-2">Question</div>
+                    <div class="col-sm-10"><input type="text" class="form-control" id="questionDesc" /></div>
                 </div>
 
                 <div class="row">
@@ -143,12 +144,11 @@
         $(document).on('click', '.openExistingProject', function () {
             $('#saveProject').html('Update');
             $('#saveProject').removeAttr('disabled');
-            $('#entityId').val($(this).data('id'));
+            $('#questionId').val($(this).data('id'));
             $('#intentId').val($(this).data('intentid'));
             $('#intentName').val($(this).data('intentid'));
             $('#intentName option:selected').text($(this).data('intentname'));
-            $('#entityName').val($(this).data('name'));
-            $('#entityDesc').val($(this).data('desc'));
+            $('#questionDesc').val($(this).data('name'));
             $('#lastUpdated').html('Last Updated: ' + $(this).data('lastupdated'));
             $('#operation').val("u");
         });
@@ -158,12 +158,11 @@
         $(document).on('click', '.deleteExistingProject', function () {
             $('#saveProject').html('Delete');
             $('#saveProject').removeAttr('disabled');
-            $('#entityId').val($(this).data('id'));
+            $('#questionId').val($(this).data('id'));
             $('#intentId').val($(this).data('intentid'));
             $('#intentName').val($(this).data('intentid'));
             $('#intentName option:selected').text($(this).data('intentname'));
-            $('#entityName').val($(this).data('name'));
-            $('#entityDesc').val($(this).data('desc'));
+            $('#questionDesc').val($(this).data('name'));
             $('#lastUpdated').html('Last Updated: ' + $(this).data('lastupdated'));
             $('#operation').val("d");
         });
@@ -174,8 +173,8 @@
         $(document).on('click', '.newProject', function () {
             $('#saveProject').html('Add');
             $('#saveProject').removeAttr('disabled');
-            $('#entityId').val(0);
-            $('#lastUpdated').html('Adding New Entity');
+            $('#questionId').val(0);
+            $('#lastUpdated').html('Adding New Project');
             $('#operation').val("a");
         });
 
@@ -184,19 +183,17 @@
         // save project
 
         $(document).on('click', '#saveProject', function () {
-            var entityId = $('#entityId').val();
-            var entityName = $('#entityName').val();
-            var entityDesc = $('#entityDesc').val();
+            var questionId = $('#questionId').val();
+            var questionDesc = $('#questionDesc').val();
             var intendId = $('#intentName').val(); // $('#intendId').val();
             var intendName = $('#intentName option:selected').text();
             var operation = $('#operation').val();
             var updatedDate = new Date;
-            debugger;
-            var project = { ChatEntityId: entityId, EntityName: entityName, EntityDescription: entityDesc, ChatIntentId: intendId, ChatIntentName: intendName, UpdatedDate: updatedDate };
-            var finalProject = { entity: project, operation: operation };
+            var project = { QuestionId: questionId, QuestionDesc: questionDesc, ChatIntentId: intendId, ChatIntentName: intendName, UpdatedDate: updatedDate };
+            var finalProject = { ask: project, operation: operation };
             $.ajax({
                 type: "POST",
-                url: "/home/EntityUpdate/",
+                url: "/admin/QuestionUpdate/",
                 data: JSON.stringify(finalProject),
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",

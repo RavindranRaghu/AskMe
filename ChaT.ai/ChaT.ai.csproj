@@ -267,6 +267,7 @@
     <Compile Include="bLogic\AskMeSpeech.cs" />
     <Compile Include="bLogic\AskMeEntityExtracttionNLP.cs" />
     <Compile Include="cAuth\AskMeAuthorize.cs" />
+    <Compile Include="Controllers\AdminController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Dto\EntityDto.cs" />
     <Compile Include="Dto\AskDto.cs" />
@@ -291,19 +292,19 @@
     <None Include="packages.config" />
     <Content Include="Views\_ViewStart.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
-    <Content Include="Views\Home\Index1.cshtml" />
+    <Content Include="Views\Archive\Index1.cshtml" />
     <Content Include="Scripts\jquery-1.10.2.min.map" />
-    <Content Include="Views\Home\Intent.cshtml" />
+    <Content Include="Views\Admin\Intent.cshtml" />
     <Content Include="Views\Home\Voice.cshtml" />
-    <Content Include="Views\Home\ask.cshtml" />
-    <Content Include="Views\Home\param.cshtml" />
-    <Content Include="Views\Home\_AdminPartial.cshtml" />
-    <Content Include="Views\Home\Entity.cshtml" />
-    <Content Include="Views\Home\fail.cshtml" />
-    <Content Include="Views\Home\Admin.cshtml" />
+    <Content Include="Views\Admin\ask.cshtml" />
+    <Content Include="Views\Admin\param.cshtml" />
+    <Content Include="Views\Admin\_AdminPartial.cshtml" />
+    <Content Include="Views\Admin\Entity.cshtml" />
+    <Content Include="Views\Admin\fail.cshtml" />
+    <Content Include="Views\Admin\Index.cshtml" />
     <Content Include="Views\Home\Login.cshtml" />
     <Content Include="Views\Shared\Unauthorized.cshtml" />
-    <Content Include="Views\Home\Index2.cshtml" />
+    <Content Include="Views\Archive\Index2.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>

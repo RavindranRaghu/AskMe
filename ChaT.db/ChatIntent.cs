@@ -27,6 +27,15 @@ namespace ChaT.db
         [Display(Name = "ChaT Bot Response")]
         public string Response { get; set; }
 
+        [Display(Name = "Need Authorization")]
+        public bool NeedAuth { get; set; }
+
+        [Display(Name = "Is Redirect Flow")]
+        public bool IsRedirect { get; set; }
+
+        [Display(Name = "Redirect Intent")]
+        public int? RedirectIntent { get; set; }
+
         [Column(TypeName = "datetime2")]
         public DateTime UpdatedDate { get; set; }
     }

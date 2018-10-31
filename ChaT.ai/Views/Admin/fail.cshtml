@@ -131,7 +131,7 @@
         var finalProject = { questionId: questionId, questionName: questionName, ChatIntentId: intentId};
         $.ajax({
             type: "POST",
-            url: "/home/FailReviewUpdate/",
+            url: "/admin/FailReviewUpdate/",
             data: JSON.stringify(finalProject),
             contentType: "application/json; charset=utf-8",
             dataType: "json",

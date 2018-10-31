@@ -12,6 +12,7 @@ namespace ChaT.ai.bLogic
     {
         private string Message = string.Empty;
         private int Node = 0;
+        private int SessionId = 0;
         private ChatDatabaseModel db;
         private AskMeHiBye hiBye;
         private AskMeSuggestionMatch suggestionMatch;
@@ -19,11 +20,12 @@ namespace ChaT.ai.bLogic
         private AskMezPossibleMatch zPossibleMatch;
         private AskMeSynonymMatch synonymMatch;
         private AskMeContentManager contentManager = new AskMeContentManager();
-        KeyValuePair<int, string> finalResponse = new KeyValuePair<int, string>();
-        public AskMeChannel(string message, int node)
+        ChatIntent finalResponse = new ChatIntent();
+        public AskMeChannel(string message, int node, int sessionId)
         {
             this.Message = message.ToLower();
             this.Node = node;
+            this.SessionId = sessionId;
             db = new ChatDatabaseModel();
             hiBye = new AskMeHiBye(Message, Node);
             suggestionMatch = new AskMeSuggestionMatch(Message, Node);
@@ -33,10 +35,10 @@ namespace ChaT.ai.bLogic
         }
 
         //ChaT Initializer
-        public KeyValuePair<int, string> ChatInitializer()
+        public ChatIntent ChatInitializer()
         {
             finalResponse = ChatResponseMain();
-            if (finalResponse.Value == contentManager.NoIntentMatchedResponse)
+            if (finalResponse.Response == contentManager.NoIntentMatchedResponse)
             {
                 var hasParentNode = db.ChatIntent.Where(x => x.ChatIntentId == Node && Node != 0);
                 if (hasParentNode.Any())
@@ -46,7 +48,7 @@ namespace ChaT.ai.bLogic
                 }
             }
 
-            if (finalResponse.Value == contentManager.NoIntentMatchedResponse)
+            if (finalResponse.Response == contentManager.NoIntentMatchedResponse)
             {
                 common.LogFailureResponse();
             }
@@ -55,17 +57,18 @@ namespace ChaT.ai.bLogic
         }
 
         //ChaT Bot Reponse Main Entry
-        public KeyValuePair<int, string> ChatResponseMain()
+        public ChatIntent ChatResponseMain()
         {
             string responseMessage = contentManager.NoIntentMatchedResponse;
             TFIDF getVocab = new TFIDF();
             Dictionary<string, string> reponseDict = new Dictionary<string, string>();
+            ChatIntent responseIntent = db.ChatIntent.Where(x => x.ChatIntentId == 0).FirstOrDefault();
 
             #region 1.CheckIntentGreetingOrGoodbye
-            if (hiBye.Greet())
-                return new KeyValuePair<int, string>(0, contentManager.GreetResponse);
+            if (hiBye.Greet())                
+                return UpdateIntent(Node, contentManager.GreetResponse, responseIntent);
             else if (hiBye.GoodBye())
-                return new KeyValuePair<int, string>(0, contentManager.GoodbyeResponse);
+                return UpdateIntent(Node, contentManager.GoodbyeResponse, responseIntent);        
             #endregion
 
             List<ChatIntent> intentList = (from intention in db.ChatIntent
@@ -82,11 +85,10 @@ namespace ChaT.ai.bLogic
                                  select ent);
                 if (hasEntity.Any())
                 {
-                    AskMeEntityExtraction entity = new AskMeEntityExtraction(Message, fullMatchIntent.ChatIntentId);
-                    KeyValuePair<int, string> entityIntent = entity.GetEntityforIntentfromNLP();
-                    return entityIntent;
+                    AskMeEntityExtraction entity = new AskMeEntityExtraction(Message, fullMatchIntent.ChatIntentId, SessionId);                    
+                    return entity.GetEntityforIntentfromNLP(fullMatchIntent);
                 }
-                return new KeyValuePair<int, string>(fullMatch.Key, responseMessage);
+                return fullMatchIntent;
             }
 
             KeyValuePair<int, bool> partialMatch = suggestionMatch.PartialSuggestionMatch(intentList);
@@ -99,21 +101,20 @@ namespace ChaT.ai.bLogic
                                  select ent);
                 if (hasEntity.Any())
                 {
-                    AskMeEntityExtraction entity = new AskMeEntityExtraction(Message, partialMatchIntent.ChatIntentId);
-                    KeyValuePair<int, string> entityIntent = entity.GetEntityforIntentfromNLP();
-                    return entityIntent;
+                    AskMeEntityExtraction entity = new AskMeEntityExtraction(Message, partialMatchIntent.ChatIntentId, SessionId);
+                    return entity.GetEntityforIntentfromNLP(partialMatchIntent);
                 }
-                return new KeyValuePair<int, string>(partialMatch.Key, responseMessage);
+                return partialMatchIntent;
             }
             #endregion
 
 
             List<string> vocabList = getVocab.GetVocabulary(Message);
             if (vocabList.Count == 0)
-                return new KeyValuePair<int, string>(Node, responseMessage);
+                return UpdateIntent(Node, contentManager.NoIntentMatchedResponse, responseIntent);
 
-            if (Message.ToLower() == "yes" || Message.ToLower() == "no")
-                return new KeyValuePair<int, string>(Node, responseMessage);
+            if (Message.ToLower() == "yes" || Message.ToLower() == "no")            
+                return UpdateIntent(Node, contentManager.NoIntentMatchedResponse, responseIntent);
 
             #region 3.TFIDF Match Process
             SimilarityCalculator similarityCalculator = new SimilarityCalculator();
@@ -147,13 +148,12 @@ namespace ChaT.ai.bLogic
                                  select ent);
                 if (hasEntity.Any())
                 {
-                    AskMeEntityExtraction entity = new AskMeEntityExtraction(Message, maxIntent.ChatIntentId);
-                    KeyValuePair<int, string> entityIntent = entity.GetEntityforIntentfromNLP();
-                    return entityIntent;
+                    AskMeEntityExtraction entity = new AskMeEntityExtraction(Message, maxIntent.ChatIntentId, SessionId);                    
+                    return entity.GetEntityforIntentfromNLP(maxIntent);
                 }
 
-                KeyValuePair<int, string> responseIntent = GetEntityforIntent(Node, maxIntent.Response);
-                return responseIntent;
+                //KeyValuePair<int, string> responseIntent = GetEntityforIntent(Node, maxIntent.Response);
+                return maxIntent;
             }
             else if (scoreDict.Where(x => x.Value >= 0.23).Any())
             {
@@ -161,12 +161,12 @@ namespace ChaT.ai.bLogic
                 responseMessage = contentManager.IntentPossibleMatchedResponse;
                 foreach (int match in possibeMatch)
                 {
-                    responseMessage = responseMessage + "<br>";
+                    responseMessage = responseMessage + ", ";
                     string suggestion = db.ChatIntent.Where(x => x.ChatIntentId == match).Select(y => y.IntentDescription).FirstOrDefault();
                     responseMessage = responseMessage + suggestion;
                 }
-                responseMessage = responseMessage + "<br>" + contentManager.IntentSuggestionResponse;
-                return new KeyValuePair<int, string>(Node, responseMessage);
+                responseMessage = responseMessage + ", " + contentManager.IntentSuggestionResponse;                
+                return UpdateIntent(Node, responseMessage, responseIntent);
             }
             #endregion
 
@@ -176,7 +176,7 @@ namespace ChaT.ai.bLogic
             {
                 common.LogFailureResponse();
                 responseMessage = probableMatchCorrect.Key;
-                return new KeyValuePair<int, string>(Node, responseMessage);
+                return UpdateIntent(Node, responseMessage, responseIntent);
             }
 
             KeyValuePair<string, bool> probableMatchTypo = zPossibleMatch.ProbableMatchTypoError(vocabList);
@@ -184,7 +184,7 @@ namespace ChaT.ai.bLogic
             {
                 common.LogFailureResponse();
                 responseMessage = probableMatchTypo.Key;
-                return new KeyValuePair<int, string>(Node, responseMessage);
+                return UpdateIntent(Node, responseMessage, responseIntent);
             }
             #endregion
 
@@ -194,11 +194,14 @@ namespace ChaT.ai.bLogic
             {
                 common.LogFailureResponse();
                 responseMessage = synMatch.Key;
-                return new KeyValuePair<int, string>(Node, responseMessage);
+                return UpdateIntent(Node, responseMessage, responseIntent);
             }
             #endregion
 
-            return new KeyValuePair<int, string>(Node, responseMessage);
+
+            responseIntent.Response = responseMessage;
+            responseIntent.ChatIntentId = Node;
+            return responseIntent;
         }
 
 
@@ -242,6 +245,13 @@ namespace ChaT.ai.bLogic
             }
 
             return responseIntent;
+        }
+
+        private ChatIntent UpdateIntent (int node, string message, ChatIntent respondIntent)
+        {
+            respondIntent.ChatIntentId = node;
+            respondIntent.Response = message;
+            return respondIntent;
         }
     }
 }
