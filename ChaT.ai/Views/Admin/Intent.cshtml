@@ -38,47 +38,73 @@
         <th>
             @Html.DisplayNameFor(model => model.ParentName)
         </th>
+        <th>
+            @Html.DisplayNameFor(model => model.NeedAuth)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.IsRedirect)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.RedirectIntentName)
+        </th>
         <th>Edit</th>
         <th>Delete</th>
     </tr>
 
     @foreach (var item in Model)
     {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.IntentName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IntentDescription)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ParentName)
-            </td>
-            <td>
-                <button type="button" class="btn btn-default glyphicon glyphicon-edit openExistingProject"
-                        data-toggle="modal"
-                        data-parentid="@item.ParentId"
-                        data-parentname="@item.ParentName"
-                        data-response="@item.Response"
-                        data-intentid="@item.ChatIntentId"
-                        data-intentname="@item.IntentName"
-                        data-intentdesc="@item.IntentDescription"
-                        data-lastupdated="@item.UpdatedDate"
-                        data-target="#projectModal"></button>
-            </td>
-            <td>
-                <button type="button" class="btn btn-default glyphicon glyphicon-trash deleteExistingProject"
-                        data-toggle="modal"
-                        data-parentid="@item.ParentId"
-                        data-parentname="@item.ParentName"
-                        data-response="@item.Response"
-                        data-intentid="@item.ChatIntentId"
-                        data-intentname="@item.IntentName"
-                        data-intentdesc="@item.IntentDescription"
-                        data-lastupdated="@item.UpdatedDate"
-                        data-target="#projectModal"></button>
-            </td>
-        </tr>
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.IntentName)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.IntentDescription)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.ParentName)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.NeedAuth)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.IsRedirect)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.RedirectIntentName)
+        </td>
+        <td>
+            <button type="button" class="btn btn-default glyphicon glyphicon-edit openExistingProject"
+                    data-toggle="modal"
+                    data-parentid="@item.ParentId"
+                    data-parentname="@item.ParentName"
+                    data-response="@item.Response"
+                    data-intentid="@item.ChatIntentId"
+                    data-intentname="@item.IntentName"
+                    data-intentdesc="@item.IntentDescription"
+                    data-needauth="@item.NeedAuth"
+                    data-isredirect="@item.IsRedirect"
+                    data-redirectintent="@item.RedirectIntent"
+                    data-redirectintentname ="@item.RedirectIntentName"
+                    data-lastupdated="@item.UpdatedDate"
+                    data-target="#projectModal"></button>
+        </td>
+        <td>
+            <button type="button" class="btn btn-default glyphicon glyphicon-trash deleteExistingProject"
+                    data-toggle="modal"
+                    data-parentid="@item.ParentId"
+                    data-parentname="@item.ParentName"
+                    data-response="@item.Response"
+                    data-intentid="@item.ChatIntentId"
+                    data-intentname="@item.IntentName"
+                    data-intentdesc="@item.IntentDescription"
+                    data-needauth="@item.NeedAuth"
+                    data-isredirect="@item.IsRedirect"
+                    data-redirectintent="@item.RedirectIntent"
+                    data-redirectintentname ="@item.RedirectIntentName"
+                    data-lastupdated="@item.UpdatedDate"
+                    data-target="#projectModal"></button>
+        </td>
+    </tr>
         @*<tr>
             <td colspan="5">
                 <b>Response: </b> @Html.DisplayFor(modelItem => item.Response)
@@ -103,13 +129,14 @@
                     </div>
                     <div>
                         2. Inorder to return an Entity Name in the Chat, Response should have the format "[entityname]" in the response. for ex: thanks, number "[phonenumber]"has noted
-                    </div>                    
+                    </div>
                 </div>
             </div>
 
             <div class="modal-body">
                 <input type="hidden" id="intent-id" />
                 <input type="hidden" id="parent-id" />
+                <input type="hidden" id="redirect-id" />
                 <input type="hidden" id="operation" />
                 <input type="hidden" id="table-reload" value="n" />
 
@@ -139,10 +166,41 @@
                 </div>
                 <div class="row">
                     <div class="col-sm-2">Response</div>
-                    <div class="col-sm-10"><textarea cols="50" rows="4" class="form-control" id="response" ></textarea></div>
+                    <div class="col-sm-10"><textarea cols="50" rows="4" class="form-control" id="response"></textarea></div>
                 </div>
-            </div>
-            <div class="modal-footer">                
+                <div class="row">
+                    <div class="col-sm-2">Need Auth</div>
+                    <div class="col-sm-10">
+                        <select class="form-control" name="needauth" id="needauth">
+                            <option value="True">True</option>
+                            <option value="False" selected>False</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-2">Is Redirect</div>
+                    <div class="col-sm-10">
+                        <select class="form-control" name="isredirect" id="isredirect">
+                            <option value="True">True</option>
+                            <option value="False" selected>False</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-2">Redirect</div>                    
+                    <div class="col-sm-10">
+                        <select class="form-control" name="redirectintentname" id="redirectintentname">
+                            @{
+                                foreach (SelectListItem intent in intentNames)
+                                {
+                                    <option value="@intent.Value">@intent.Text</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>            
+            <div class="modal-footer">
                 <button id="saveProject" type="button" class="btn btn-default">Save</button>
                 <button id="closeProject" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
             </div>
@@ -170,7 +228,10 @@
             $('#intent-name').val($(this).data('intentname'));
             $('#intent-desc').val($(this).data('intentdesc'));
             $('#response').val($(this).data('response'));
-            $('#parent option:selected').text($(this).data('parentname'));
+            $('#needauth option:selected').text($(this).data('needauth'));
+            $('#isredirect option:selected').text($(this).data('isredirect'));
+            $('#redirect-id').val($(this).data('redirectintent'));
+            $('#redirectintentname').val($(this).data('redirectintent'));
             console.log($(this).data('parentname'));
             $('#parent').val($(this).data('parentid'));
             $('#parent-id').val($(this).data('parentid'));
@@ -188,6 +249,10 @@
             $('#intent-name').val($(this).data('intentname'));
             $('#intent-desc').val($(this).data('intentdesc'));
             $('#response').val($(this).data('response'));
+            $('#needauth option:selected').text($(this).data('needauth'));
+            $('#isredirect option:selected').text($(this).data('isredirect'));
+            $('#redirect-id').val($(this).data('redirectintent'));
+            $('#redirectintentname').val($(this).data('redirectintent'));
             $('#parent option:selected').text($(this).data('parentname'));
             $('#parent').val($(this).data('parentid'));
             $('#parent-id').val($(this).data('parentid'));
@@ -217,10 +282,14 @@
             var questionId = $('#questionId').val();
             var parentId = $('#parent').val();
             var parentName = $('#parent option:selected').text();
+            var needauthval = $('#needauth option:selected').text();
+            var isredirectval = $('#isredirect option:selected').text();
+            var redirectId = $('#redirect-id').val();
+            var redirectintentname = $('#redirectintentname option:selected').text();
             var response = $('#response').val();
             var operation = $('#operation').val();
             var updatedDate = new Date;
-            var project = { ChatIntentId: intentId, IntentName: intentName, IntentDescription: intentdesc, ParentId: parentId, ParentName: parentName, Response: response, UpdatedDate: updatedDate };
+            var project = { ChatIntentId: intentId, IntentName: intentName, IntentDescription: intentdesc, ParentId: parentId, ParentName: parentName, Response: response, NeedAuth: needauthval, IsRedirect: isredirectval, RedirectIntent: redirectId, RedirectIntentName: redirectintentname, UpdatedDate: updatedDate };
             var finalProject = { intent: project, operation: operation };
             $.ajax({
                 type: "POST",
@@ -258,6 +327,10 @@
 
         $('#parent').change(function () {
             $('#parent-id').val($(this).val());
+        });
+
+        $('#redirectintentname').change(function () {
+            $('#redirect-id').val($(this).val());
         });
 
     });

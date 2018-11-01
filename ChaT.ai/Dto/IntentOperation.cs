@@ -26,6 +26,14 @@ namespace ChaT.ai.Dto
 
         public string Response { get; set; }
 
+        public bool NeedAuth { get; set; }
+
+        public bool IsRedirect { get; set; }
+
+        public int? RedirectIntent { get; set; }
+
+        public string RedirectIntentName { get; set; }
+
         public DateTime UpdatedDate { get; set; }
     }
 }

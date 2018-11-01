@@ -32,6 +32,10 @@ namespace ChaT.ai.Controllers
                                                ParentId = inte.ParentId,
                                                ParentName = par.IntentName,
                                                Response = inte.Response,
+                                               NeedAuth = inte.NeedAuth,
+                                               IsRedirect = inte.IsRedirect,
+                                               RedirectIntent = inte.RedirectIntent,
+                                               RedirectIntentName = (inte.RedirectIntent == null) ? string.Empty : db.ChatIntent.Where(x => x.ChatIntentId == inte.RedirectIntent.Value).Select(x => x.IntentName).FirstOrDefault(),
                                                UpdatedDate = inte.UpdatedDate
                                            }).OrderBy(y => y.ChatIntentId).ToList();
 
@@ -192,6 +196,9 @@ namespace ChaT.ai.Controllers
                     finalIntent.IntentDescription = intent.IntentDescription;
                     finalIntent.Response = intent.Response;
                     finalIntent.ParentId = intent.ParentId;
+                    finalIntent.NeedAuth = intent.NeedAuth;
+                    finalIntent.IsRedirect = intent.IsRedirect;
+                    finalIntent.RedirectIntent = intent.RedirectIntent;
                     finalIntent.UpdatedDate = DateTime.Now;
                     db.ChatIntent.Add(finalIntent);
                 }
@@ -202,6 +209,9 @@ namespace ChaT.ai.Controllers
                     finalIntent.IntentDescription = intent.IntentDescription;
                     finalIntent.Response = intent.Response;
                     finalIntent.ParentId = intent.ParentId;
+                    finalIntent.NeedAuth = intent.NeedAuth;
+                    finalIntent.IsRedirect = intent.IsRedirect;
+                    finalIntent.RedirectIntent = intent.RedirectIntent;
                     finalIntent.UpdatedDate = DateTime.Now;
                 }
                 else
