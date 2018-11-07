@@ -214,6 +214,8 @@
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\img\1.png" />
+    <Content Include="Content\img\folder.png" />
+    <Content Include="Content\img\folder32.png" />
     <Content Include="Content\img\Jarvis.png" />
     <Content Include="Content\img\JarvisNew.png" />
     <Content Include="Content\img\loadchat.gif" />
@@ -306,6 +308,7 @@
     <Content Include="Views\Shared\Unauthorized.cshtml" />
     <Content Include="Views\Archive\Index2.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
+    <Content Include="Views\Admin\IntentNew.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

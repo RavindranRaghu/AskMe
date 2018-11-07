@@ -1,0 +1,352 @@
+﻿@model IEnumerable<ChaT.ai.Dto.ChatIntentDto>
+
+@{
+    ViewBag.Title = "Intent";
+    List<SelectListItem> intentNames = ViewBag.intentNames as List<SelectListItem>;
+}
+
+<style>
+    .form-control {
+        margin-bottom: 10px;
+    }
+
+    .page-subheader {
+        font-size: x-large;
+    }
+
+    .intent-name {
+        font-size: large;
+        padding-right: 10px;
+    }
+
+    .viewBody {
+        padding:10px;
+        border: 1px solid whitesmoke;
+    }
+
+    .viewRow {
+        padding-bottom:10px;
+        font-size:large;
+    }
+
+    .viewText {
+        color: darkgrey;
+    }
+
+</style>
+
+<div style="padding-top:23px;">
+    @Html.Partial("_AdminPartial")
+</div>
+<div style="padding-top:15px;">
+    <span class="page-subheader">Intent</span>
+    <button type="button" class="btn btn-link newProject"
+            data-toggle="modal"
+            data-target="#projectModal"
+            data-intentid ="0">
+        Add Root Nodes
+    </button>
+</div>
+
+<div class="row">
+    <div class="col-sm-6"><div id="intent-tree"><img src="~/Content/img/loadchat.gif" /></div></div>
+    <div class="col-sm-6"><div id="intent-viewdetail"><span class="viewRow">Click on a Intent to view detail</span></div></div>
+</div>
+
+
+
+<div id="projectModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="appHeading">Intent</h4>
+                <div><span style="color:dodgerblue" id="lastUpdated"></span></div>
+                <div class="alert alert-warning">
+                    <div>
+                        1. If an Intent has Entity, it should be contain the "entity" in the Intent Name. for ex: askentityphonenumber
+                    </div>
+                    <div>
+                        2. Inorder to return an Entity Name in the Chat, Response should have the format "[entityname]" in the response. for ex: thanks, number "[phonenumber]"has noted
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-body">
+                <input type="hidden" id="intent-id" />
+                <input type="hidden" id="parent-id" />
+                <input type="hidden" id="redirect-id" />
+                <input type="hidden" id="operation" />
+                <input type="hidden" id="table-reload" value="n" />
+
+                <div class="row">
+                    <div class="col-sm-2">Name</div>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="intent-name" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-2">Description</div>
+                    <div class="col-sm-10"><input type="text" class="form-control" id="intent-desc" /></div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-2">Parent</div>
+                    @*<input type="text" class="form-control" id="parent" />*@
+                    <div class="col-sm-10">
+                        <select class="form-control" name="parent" id="parent">
+                            @{
+                                foreach (SelectListItem intent in intentNames)
+                                {
+                                    <option value="@intent.Value">@intent.Text</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-2">Response</div>
+                    <div class="col-sm-10"><textarea cols="50" rows="4" class="form-control" id="response"></textarea></div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-2">Need Auth</div>
+                    <div class="col-sm-10">
+                        <select class="form-control" name="needauth" id="needauth">
+                            <option value="True">True</option>
+                            <option value="False" selected>False</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-2">Is Redirect</div>
+                    <div class="col-sm-10">
+                        <select class="form-control" name="isredirect" id="isredirect">
+                            <option value="True">True</option>
+                            <option value="False" selected>False</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-2">Redirect</div>
+                    <div class="col-sm-10">
+                        <select class="form-control" name="redirectintentname" id="redirectintentname">
+                            @{
+                                foreach (SelectListItem intent in intentNames)
+                                {
+                                    <option value="@intent.Value">@intent.Text</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="saveProject" type="button" class="btn btn-default">Save</button>
+                <button id="closeProject" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var treeHtml = "";
+    var counter = 0;
+    $(function () {
+        loadIntentTree();
+    });
+
+    function loadIntentTree() {
+        $.ajax({
+            type: "GET",
+            url: "/admin/IntentTree/",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (result) {
+                console.log(result);
+                counter = 0;
+                treeHtml = "";
+                treeHtml = treeHtml + treeRecursion(result);
+                $("#intent-tree").html(treeHtml)
+            },
+            error: function (errorMsg) {
+                $("#intent-tree").html("No nodes");
+            }
+        });
+    }
+
+    function treeRecursion(tree) {
+        counter = counter + 20;
+        treeHtml = treeHtml + '<ul style="list-style-image: url(../content/img/folder.png);">';
+        tree.forEach(function (item) {
+
+            var dataHtml = '';
+            dataHtml += 'data-parentid="' + item.ParentId + '"';
+            dataHtml += 'data-parentname="' + item.ParentName + '"';
+            dataHtml += 'data-response="' + item.Response + '"';
+            dataHtml += 'data-intentid="' + item.ChatIntentId + '"';
+            dataHtml += 'data-intentname="' + item.IntentName + '"';
+            dataHtml += 'data-intentdesc="' + item.IntentDescription + '"';
+            dataHtml += 'data-needauth="' + item.NeedAuth + '"';
+            dataHtml += 'data-isredirect="' + item.IsRedirect + '"';
+            dataHtml += 'data-redirectintent="' + item.RedirectIntent + '"';
+            dataHtml += 'data-redirectintentname="' + item.RedirectIntentName + '"';
+            dataHtml += 'data-lastupdated="' + item.UpdatedDate + '"';
+
+            treeHtml += '<li>';
+            treeHtml += '<a href="#" style="text-decoration:underline" class="viewProject" ' + dataHtml + '><span class="intent-name">' + item.IntentName + '</span></a>';
+
+            dataHtml += 'data-toggle="modal" data-target="#projectModal"';
+            treeHtml += '<a href = "#" class="newProject" ' + dataHtml + ' > <span class="glypicon glyphicon-plus">Child</span></a >';
+            treeHtml += '<a href = "#" class="openExistingProject" ' + dataHtml + '> <span class="glypicon glyphicon-edit">Update</span></a >';
+            treeHtml += '<a href = "#" class="deleteExistingProject" ' + dataHtml + '> <span class="glypicon glyphicon-trash">Delete</span></a >';
+            treeHtml += '</li>';
+            if (item.Children.length > 0) {
+                treeRecursion(item.Children);
+            }
+        });
+        treeHtml = treeHtml + '</ul>'
+        return treeHtml;
+    }
+
+
+    $(function () {
+
+        //view Details 
+        $(document).on('click', '.viewProject', function () {
+                        
+            var viewHtml = '<div class="viewBody">';
+            viewHtml += '<div class="viewRow"><span class="viewLabel">Intent Id: </span><span class="viewText">' + $(this).data('intentid') + '</span></div>';
+            viewHtml += '<div class="viewRow"><span class="viewLabel">Intent Name: </span><span class="viewText">' + $(this).data('intentname') + '</span></div>';            
+            viewHtml += '<div class="viewRow"><span class="viewLabel">Intent Desc: </span><span class="viewText">' + $(this).data('intentdesc') + '</span></div>';
+            viewHtml += '<div class="viewRow"><span class="viewLabel">Response: </span><span class="viewText">' + $(this).data('response') + '</span></div>';
+            viewHtml += '<div class="viewRow"><span class="viewLabel">Need Auth: </span><span class="viewText">' + $(this).data('needauth') + '</span></div>';
+            viewHtml += '<div class="viewRow"><span class="viewLabel">Is Redirect: </span><span class="viewText">' + $(this).data('isredirect') + '</span></div>';            
+            viewHtml += '<div class="viewRow"><span class="viewLabel">Parent: </span><span class="viewText">' + $(this).data('parentname') + '</span></div>';
+            viewHtml += '<div class="viewRow"><span class="viewLabel">Redirect To: </span><span class="viewText">' + $(this).data('redirectintentname') + '</span></div>';
+            viewHtml += '</div>';
+
+            $("#intent-viewdetail").html(viewHtml);
+        });
+
+        //open Modal for existing project
+
+        $(document).on('click', '.openExistingProject', function () {
+            $('#saveProject').html('Update');
+            $('#saveProject').removeAttr('disabled');
+            $('#questionId').val($(this).data('id'));
+            $('#intent-id').val($(this).data('intentid'));
+            $('#intent-name').val($(this).data('intentname'));
+            $('#intent-desc').val($(this).data('intentdesc'));
+            $('#response').val($(this).data('response'));
+            $('#needauth option:selected').text($(this).data('needauth'));
+            $('#isredirect option:selected').text($(this).data('isredirect'));
+            $('#redirect-id').val($(this).data('redirectintent'));
+            $('#redirectintentname').val($(this).data('redirectintent'));
+            console.log($(this).data('parentname'));
+            $('#parent').val($(this).data('parentid'));
+            $('#parent-id').val($(this).data('parentid'));
+            $('#lastUpdated').html('Last Updated: ' + $(this).data('lastupdated'));
+            $('#operation').val("u");
+        });
+
+        //open Modal for delete
+
+        $(document).on('click', '.deleteExistingProject', function () {
+            $('#saveProject').html('Delete');
+            $('#saveProject').removeAttr('disabled');
+            $('#questionId').val($(this).data('id'));
+            $('#intent-id').val($(this).data('intentid'));
+            $('#intent-name').val($(this).data('intentname'));
+            $('#intent-desc').val($(this).data('intentdesc'));
+            $('#response').val($(this).data('response'));
+            $('#needauth option:selected').text($(this).data('needauth'));
+            $('#isredirect option:selected').text($(this).data('isredirect'));
+            $('#redirect-id').val($(this).data('redirectintent'));
+            $('#redirectintentname').val($(this).data('redirectintent'));
+            $('#parent option:selected').text($(this).data('parentname'));
+            $('#parent').val($(this).data('parentid'));
+            $('#parent-id').val($(this).data('parentid'));
+            $('#lastUpdated').html('Last Updated: ' + $(this).data('lastupdated'));
+            $('#operation').val("d");
+        });
+
+
+        //open Modal for new project
+
+        $(document).on('click', '.newProject', function () {
+            $('#saveProject').html('Add');
+            $('#saveProject').removeAttr('disabled');
+            $('#intent-id').val(0);
+            $('#parent').val($(this).data('intentid'));
+            $('#parent-id').val($(this).data('intentid'));
+            $('#lastUpdated').html('Adding New Project');
+            $('#operation').val("a");
+        });
+
+
+
+        // save project
+
+        $(document).on('click', '#saveProject', function () {
+            var intentId = $('#intent-id').val(); // $('#intendId').val();
+            var intentName = $('#intent-name').val();
+            var intentdesc = $('#intent-desc').val();
+            var questionId = $('#questionId').val();
+            var parentId = $('#parent').val();
+            var parentName = $('#parent option:selected').text();
+            var needauthval = $('#needauth option:selected').text();
+            var isredirectval = $('#isredirect option:selected').text();
+            var redirectId = $('#redirect-id').val();
+            var redirectintentname = $('#redirectintentname option:selected').text();
+            var response = $('#response').val();
+            var operation = $('#operation').val();
+            var updatedDate = new Date;
+            var project = { ChatIntentId: intentId, IntentName: intentName, IntentDescription: intentdesc, ParentId: parentId, ParentName: parentName, Response: response, NeedAuth: needauthval, IsRedirect: isredirectval, RedirectIntent: redirectId, RedirectIntentName: redirectintentname, UpdatedDate: updatedDate };
+            var finalProject = { intent: project, operation: operation };
+            $.ajax({
+                type: "POST",
+                url: "/admin/IntentUpdate/",
+                data: JSON.stringify(finalProject),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (result) {
+                    if (result == true) {
+                        $('#lastUpdated').html('Updated Successfully <span style="color:green" class="glyphicon glyphicon-ok-circle"> </span>');
+                        $('#table-reload').val("y");
+                        $('#saveProject').attr('disabled', 'disabled');
+                    }
+                    else {
+                        $('#lastUpdated').html('Updated Failed <span style="color:red" class="glyphicon glyphicon-remove-circle"> </span>');
+                        $('#table-reload').val("n");
+                        $('#saveProject').removeAttr('disabled');
+                    }
+                },
+                error: function (errorMsg) {
+                    $('#lastUpdated').html('<span class="alert alert-warning">' + errorMsg.statusText + '</span> ');
+                }
+            });
+        });
+
+
+
+        //Close Modal
+
+        $(document).on('click', '#closeProject', function () {
+            if ($('#table-reload').val() == "y") {
+                location.reload();
+            }
+        });
+
+        $('#parent').change(function () {
+            $('#parent-id').val($(this).val());
+        });
+
+        $('#redirectintentname').change(function () {
+            $('#redirect-id').val($(this).val());
+        });
+
+    });
+
+
+
+</script>

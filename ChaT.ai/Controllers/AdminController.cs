@@ -14,9 +14,11 @@ namespace ChaT.ai.Controllers
     {
 
         private ChatDatabaseModel db;
+        private List<ChatIntentTreeDto> intentTreeDtos;
         public AdminController()
         {
             db = new ChatDatabaseModel();
+            intentTreeDtos = new List<ChatIntentTreeDto>();
         }
         // GET: Admin        
         public ActionResult Intent()
@@ -49,7 +51,62 @@ namespace ChaT.ai.Controllers
 
             return View(intents);
         }
-        
+
+        public ActionResult IntentNew()
+        {
+            List<ChatIntent> intent = db.ChatIntent.ToList();
+            List<ChatIntentDto> intents = (from inte in db.ChatIntent
+                                           join par in db.ChatIntent on inte.ParentId equals par.ChatIntentId
+                                           select new ChatIntentDto
+                                           {
+                                               ChatIntentId = inte.ChatIntentId,
+                                               IntentName = inte.IntentName,
+                                               IntentDescription = inte.IntentDescription,
+                                               ParentId = inte.ParentId,
+                                               ParentName = par.IntentName,
+                                               Response = inte.Response,
+                                               NeedAuth = inte.NeedAuth,
+                                               IsRedirect = inte.IsRedirect,
+                                               RedirectIntent = inte.RedirectIntent,
+                                               RedirectIntentName = (inte.RedirectIntent == null) ? string.Empty : db.ChatIntent.Where(x => x.ChatIntentId == inte.RedirectIntent.Value).Select(x => x.IntentName).FirstOrDefault(),
+                                               UpdatedDate = inte.UpdatedDate
+                                           }).OrderBy(y => y.ChatIntentId).ToList();
+
+            List<SelectListItem> intentNames = db.ChatIntent.ToList().Select(u => new SelectListItem
+            {
+                Text = u.IntentName,
+                Value = u.ChatIntentId.ToString()
+            }).ToList();
+
+            ViewBag.intentNames = intentNames;
+
+            return View(intents);
+        }
+
+        public ActionResult IntentTree()
+        {            
+            List<ChatIntentDto> intents = (from inte in db.ChatIntent
+                                           join par in db.ChatIntent on inte.ParentId equals par.ChatIntentId
+                                           where inte.ChatIntentId > 0
+                                           select new ChatIntentDto
+                                           {
+                                               ChatIntentId = inte.ChatIntentId,
+                                               IntentName = inte.IntentName,
+                                               IntentDescription = inte.IntentDescription,
+                                               ParentId = inte.ParentId,
+                                               ParentName = par.IntentName,
+                                               Response = inte.Response,
+                                               NeedAuth = inte.NeedAuth,
+                                               IsRedirect = inte.IsRedirect,
+                                               RedirectIntent = inte.RedirectIntent,
+                                               RedirectIntentName = (inte.RedirectIntent == null) ? string.Empty : db.ChatIntent.Where(x => x.ChatIntentId == inte.RedirectIntent.Value).Select(x => x.IntentName).FirstOrDefault(),
+                                               UpdatedDate = inte.UpdatedDate
+                                           }).OrderBy(y => y.ChatIntentId).ToList();
+            
+            List<ChatIntentTreeDto> intentTree = FillRecursive(intents, 0);
+            return Json(intentTree, JsonRequestBehavior.AllowGet);
+        }
+
         public ActionResult ask()
         {
 
@@ -455,5 +512,23 @@ namespace ChaT.ai.Controllers
 
         }
 
+        public List<ChatIntentTreeDto> FillRecursive(List<ChatIntentDto> flatObjects, int parentId)
+        {
+            return flatObjects.Where(x => x.ParentId.Equals(parentId)).Select(inte => new ChatIntentTreeDto
+            {
+                ChatIntentId = inte.ChatIntentId,
+                IntentName = inte.IntentName,
+                IntentDescription = inte.IntentDescription,
+                ParentId = inte.ParentId,
+                ParentName = (db.ChatIntent.Where(x => x.ChatIntentId == inte.ParentId).Select(x => x.IntentName).FirstOrDefault()),
+                Response = inte.Response,
+                NeedAuth = inte.NeedAuth,
+                IsRedirect = inte.IsRedirect,
+                RedirectIntent = inte.RedirectIntent,
+                RedirectIntentName = (inte.RedirectIntent == null) ? string.Empty : db.ChatIntent.Where(x => x.ChatIntentId == inte.RedirectIntent.Value).Select(x => x.IntentName).FirstOrDefault(),
+                UpdatedDate = inte.UpdatedDate,
+                Children = FillRecursive(flatObjects, inte.ChatIntentId)
+            }).ToList();
+        }
     }
 }
