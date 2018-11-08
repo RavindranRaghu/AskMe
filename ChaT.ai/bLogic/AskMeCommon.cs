@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using System.Web.Mvc;
 
 namespace ChaT.ai.bLogic
 {
@@ -100,6 +101,31 @@ namespace ChaT.ai.bLogic
                 }
             }
             return isEmpty;
+        }
+
+        public List<string> GetEntityType()
+        {            
+            List<string> entityType = new List<string>();
+            entityType.Add("NUMBER");
+            entityType.Add("PERSON");
+            entityType.Add("PASSCODE");
+            entityType.Add("LOCATION");
+            entityType.Add("DATETIME");
+            return entityType;
+        }
+
+        public List<SelectListItem> GetEntityTypeSelectList()
+        {
+            List<SelectListItem> selectListItems = new List<SelectListItem>();
+            
+            foreach (string entityType in GetEntityType())
+            {
+                SelectListItem selectListItem = new SelectListItem();
+                selectListItem.Text = entityType;
+                selectListItem.Value = entityType;
+                selectListItems.Add(selectListItem);
+            }
+            return selectListItems;
         }
 
     }

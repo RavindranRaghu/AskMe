@@ -57,7 +57,7 @@ namespace ChaT.ai.Dto
             }
             #endregion             
 
-            #region Has Has Atleast Unrecognized Entity
+            #region Has Atleast Unrecognized Entity
             var hasEntity = (from inte in intentList
                              join ent in entityList on inte.ChatIntentId equals ent.ChatIntentId
                              where inte.ChatIntentId == node

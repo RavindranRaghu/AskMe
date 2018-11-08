@@ -1,4 +1,5 @@
-﻿using ChaT.ai.cAuth;
+﻿using ChaT.ai.bLogic;
+using ChaT.ai.cAuth;
 using ChaT.ai.Dto;
 using ChaT.db;
 using System;
@@ -157,6 +158,7 @@ namespace ChaT.ai.Controllers
                                            ChatEntityId = ent.ChatEntityId,
                                            EntityName = ent.EntityName,
                                            EntityDescription = ent.EntityDescription,
+                                           EntityType = ent.EntityType,
                                            ChatIntentId = ent.ChatIntentId,
                                            ChatIntentName = intent.IntentName,
                                            UpdatedDate = ent.UpdatedDate
@@ -167,7 +169,11 @@ namespace ChaT.ai.Controllers
                 Value = u.ChatIntentId.ToString()
             }).ToList();
 
+            AskMeCommon common = new AskMeCommon("hello",0);
+            List<SelectListItem> entityTypes = common.GetEntityTypeSelectList();
+
             ViewBag.intents = intents;
+            ViewBag.entityTypes = entityTypes;
 
             return View(entity);
         }
@@ -359,6 +365,7 @@ namespace ChaT.ai.Controllers
                 {
                     entity.EntityName = entitydto.EntityName;
                     entity.EntityDescription = entitydto.EntityDescription;
+                    entity.EntityType = entitydto.EntityType;
                     entity.ChatIntentId = entitydto.ChatIntentId;
                     entity.UpdatedDate = DateTime.Now;
                     db.ChatEntity.Add(entity);
@@ -368,6 +375,7 @@ namespace ChaT.ai.Controllers
                     entity = db.ChatEntity.Where(x => x.ChatEntityId == entitydto.ChatEntityId).FirstOrDefault();
                     entity.EntityName = entitydto.EntityName;
                     entity.EntityDescription = entitydto.EntityDescription;
+                    entity.EntityType = entitydto.EntityType;
                     entity.ChatIntentId = entitydto.ChatIntentId;
                     entity.UpdatedDate = DateTime.Now;
                 }
