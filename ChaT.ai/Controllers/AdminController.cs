@@ -72,11 +72,18 @@ namespace ChaT.ai.Controllers
                                                UpdatedDate = inte.UpdatedDate
                                            }).OrderBy(y => y.ChatIntentId).ToList();
 
-            List<SelectListItem> intentNames = db.ChatIntent.ToList().Select(u => new SelectListItem
+            SelectListItem selectListItem = new SelectListItem();
+            selectListItem.Text = "Select Intent";
+            selectListItem.Value = "9999";
+            List<SelectListItem> intentNames = new List<SelectListItem>();
+            intentNames.Add(selectListItem);
+            List<SelectListItem> intentNamesDB = db.ChatIntent.ToList().Select(u => new SelectListItem
             {
                 Text = u.IntentName,
                 Value = u.ChatIntentId.ToString()
             }).ToList();
+
+            intentNames.AddRange(intentNamesDB);
 
             ViewBag.intentNames = intentNames;
 

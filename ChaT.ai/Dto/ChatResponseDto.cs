@@ -24,8 +24,8 @@ namespace ChaT.ai.Dto
 
         private ChatDatabaseModel db = new ChatDatabaseModel();
 
-        public ChatResponseDto GetChatResponse(int sessionId, string message, int node) {
-
+        public ChatResponseDto GetChatResponse(int sessionId, string message, int node)
+        {
             ChatDatabaseModel db = new ChatDatabaseModel();
             ChatResponseDto responseDto = new ChatResponseDto();
 
@@ -36,6 +36,7 @@ namespace ChaT.ai.Dto
             string phoneNumber = string.Empty;
             ChatIntent responseIntent = new ChatIntent();
             List<ChatIntent> intentList = db.ChatIntent.ToList();
+            List<ChatEntity> entityList = db.ChatEntity.ToList();
             ChatSession chatSession = db.ChatSession.Where(x => x.SessionId == sessionId).FirstOrDefault();
 
             #endregion
@@ -57,8 +58,8 @@ namespace ChaT.ai.Dto
             #endregion             
 
             #region Has Entity
-            var hasEntity = (from inte in db.ChatIntent
-                             join ent in db.ChatEntity on inte.ChatIntentId equals ent.ChatIntentId
+            var hasEntity = (from inte in intentList
+                             join ent in entityList on inte.ChatIntentId equals ent.ChatIntentId
                              where inte.ChatIntentId == node
                              select inte).ToList();
 
@@ -92,7 +93,7 @@ namespace ChaT.ai.Dto
             }
             
 
-            var hasOneChildIntent = (from inte in db.ChatIntent
+            var hasOneChildIntent = (from inte in intentList
                                      where inte.ParentId == node
                                      select inte).ToList();
 
@@ -101,7 +102,7 @@ namespace ChaT.ai.Dto
             {
                 ChatIntent childIntent = hasOneChildIntent.FirstOrDefault();
 
-                var hasOneIntentwithEntity = (from ent in db.ChatEntity
+                var hasOneIntentwithEntity = (from ent in entityList
                                               where ent.ChatIntentId == childIntent.ChatIntentId
                                               select ent).ToList();
                 if (hasOneIntentwithEntity.Count > 0)
