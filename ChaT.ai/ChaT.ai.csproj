@@ -271,6 +271,7 @@
     <Compile Include="cAuth\AskMeAuthorize.cs" />
     <Compile Include="Controllers\AdminController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Dto\ChatResponseDto.cs" />
     <Compile Include="Dto\EntityDto.cs" />
     <Compile Include="Dto\AskDto.cs" />
     <Compile Include="Dto\AskOperation.cs" />
