@@ -57,13 +57,13 @@ namespace ChaT.ai.Dto
             }
             #endregion             
 
-            #region Has Entity
+            #region Has Has Atleast Unrecognized Entity
             var hasEntity = (from inte in intentList
                              join ent in entityList on inte.ChatIntentId equals ent.ChatIntentId
                              where inte.ChatIntentId == node
                              select inte).ToList();
 
-            // Check if Chat has one Intent with Entity
+            // Has Atleast Unrecognized Entity 
 
             var hasUnrecognizedEntity = db.ChatSessionEntity.Where(x => x.SessionId == sessionId && x.EntityType == "unrecog").ToList();
 
@@ -91,13 +91,16 @@ namespace ChaT.ai.Dto
                 responseDto.Suggestion = suggestforEntity;
                 return responseDto;
             }
-            
 
+            #endregion
+
+            #region Has one Intent with an Entity
             var hasOneChildIntent = (from inte in intentList
                                      where inte.ParentId == node
                                      select inte).ToList();
 
-            // Check if Chat has one Intent with Entity
+
+            // Has one Intent with an Entity
             if (hasOneChildIntent.Count == 1)
             {
                 ChatIntent childIntent = hasOneChildIntent.FirstOrDefault();

@@ -87,17 +87,6 @@ namespace ChaT.ai.Controllers
             return View();
         }
 
-        private string replaceParam(string response)
-        {
-            if (!string.IsNullOrEmpty(response))
-            {
-                string custName = db.ChatParameter.Where(x => x.ParameterName == "customername").Select(x => x.ParameterValue).FirstOrDefault();
-                response = response.Replace("parametercustomername", custName);
-            }
-            return response;
-        }
-        
-
         [HttpPost]
         public async Task<ActionResult> UploadAudio()
         {
