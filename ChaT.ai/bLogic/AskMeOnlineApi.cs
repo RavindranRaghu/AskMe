@@ -94,7 +94,8 @@ namespace ChaT.ai.bLogic
 
             foreach (ChatSessionEntity chatEntity in recognizedList)
             {
-                chatEntity.EntityType = "recog";                
+                chatEntity.EntityType = "recog";
+                chatEntity.NotRecognized = false;
             }
             db.SaveChanges();
 

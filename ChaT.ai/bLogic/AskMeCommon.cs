@@ -110,7 +110,7 @@ namespace ChaT.ai.bLogic
             entityType.Add("PERSON");
             entityType.Add("PASSCODE");
             entityType.Add("LOCATION");
-            entityType.Add("DATETIME");
+            //entityType.Add("DATETIME");
             return entityType;
         }
 

@@ -99,24 +99,29 @@ namespace ChaT.ai.bLogic
 
         public ChatIntent GetEntityforIntentfromNLP(ChatIntent responseIntent)
         {
-            AskMeEntityExtracttionNLP nlp = new AskMeEntityExtracttionNLP();            
-            List<EntityRecognition> entityListMessage = nlp.ExtractionChannel(Message);
+            AskMeEntityExtracttionNLP nlp = new AskMeEntityExtracttionNLP();
+            List<EntityRecognition> entityListMessage = new List<EntityRecognition>();
             List<EntityRecognized> entityListRecognized = new List<EntityRecognized>();
             List<ChatEntity> entityListDb = db.ChatEntity.Where(x=>x.ChatIntentId == Node).ToList();
+            if (entityListDb.Where(x=>x.EntityType.Contains("PERSON")).Any() || entityListDb.Where(x => x.EntityType.Contains("LOCATION")).Any())
+            {
+                entityListMessage = nlp.ExtractionChannel(Message);
+            }
             HttpContext httpContext = HttpContext.Current;
 
             foreach(ChatEntity entity in entityListDb)
             {
-                if (entity.EntityName.ToUpper().Contains("PERSON") && entityListMessage.Count >0)
+                if (entity.EntityType.ToUpper().Contains("PERSON") && entityListMessage.Count >0)
                 {
                     var hasRecognition = entityListMessage.Where(x => x.EntityType == "PERSON");
                     if (hasRecognition.Any())
                     {
                         EntityRecognition recog = hasRecognition.FirstOrDefault();
                         EntityRecognized recognized = new EntityRecognized();
-                        recognized.EntityType = recog.EntityType;
+                        recognized.EntityType = entity.EntityType;
                         recognized.EntityName = entity.EntityName;
                         recognized.EntityValue = recog.EntityValue;
+                        recognized.NotRecognized = false;
                         entityListRecognized.Add(recognized);
                         if (entity.EntityName.ToUpper().Contains("USERNAME"))
                         {
@@ -127,37 +132,40 @@ namespace ChaT.ai.bLogic
                         }                        
                     }
                 }
-                else if (entity.EntityName.ToUpper().Contains("LOCATION") && entityListMessage.Count > 0)
+                else if (entity.EntityType.ToUpper().Contains("LOCATION") && entityListMessage.Count > 0)
                 {
                     var hasRecognition = entityListMessage.Where(x => x.EntityType == "LOCATION");
                     if (hasRecognition.Any())
                     {
                         EntityRecognition recog = hasRecognition.FirstOrDefault();
                         EntityRecognized recognized = new EntityRecognized();
-                        recognized.EntityType = recog.EntityType;
+                        recognized.EntityType = entity.EntityType;
                         recognized.EntityName = entity.EntityName;
                         recognized.EntityValue = recog.EntityValue;
+                        recognized.NotRecognized = false;
                         entityListRecognized.Add(recognized);
                     }
                 }
-                else if (entity.EntityName.ToUpper().Contains("NUMBER") && entityListMessage.Count > 0)
+                else if (entity.EntityType.ToUpper().Contains("NUMBER") && entityListMessage.Count > 0)
                 {
                     string numericValue = new String(Message.Where(Char.IsDigit).ToArray());
                     if (numericValue.Length > 0)
                     {
                         EntityRecognized recognized = new EntityRecognized();
-                        recognized.EntityType = "NUMBER";
+                        recognized.EntityType = entity.EntityType;
                         recognized.EntityName = entity.EntityName;
                         recognized.EntityValue = numericValue;
+                        recognized.NotRecognized = false;
                         entityListRecognized.Add(recognized);
                     }
                 }
                 else
                 {
                     EntityRecognized recognized = new EntityRecognized();
-                    recognized.EntityType = "unrecog";
+                    recognized.EntityType = entity.EntityType;
                     recognized.EntityName = entity.EntityName;
                     recognized.EntityValue = entity.EntityDescription;
+                    recognized.NotRecognized = true;
                     entityListRecognized.Add(recognized);
                 }
             }
@@ -172,9 +180,10 @@ namespace ChaT.ai.bLogic
                 sessionEntity.EntityType = recognized.EntityType;
                 sessionEntity.EntityName = recognized.EntityName;
                 sessionEntity.EntityValue = recognized.EntityValue;
+                sessionEntity.NotRecognized = recognized.NotRecognized;
                 db.ChatSessionEntity.Add(sessionEntity);
                 sessionEntityList.Add(sessionEntity);
-                if (recognized.EntityType == "unrecog")
+                if (recognized.NotRecognized)
                 {
                     noEntityMessage = noEntityMessage + recognized.EntityValue+ " ";                    
                 }
@@ -202,13 +211,17 @@ namespace ChaT.ai.bLogic
         public KeyValuePair<int, string> CheckIfAtleastOneEntityHasValue(List<ChatSessionEntity> entityListRecognized)
         {
             AskMeEntityExtracttionNLP nlp = new AskMeEntityExtracttionNLP();
-            List<EntityRecognition> entityListMessage = nlp.ExtractionChannel(Message);
+            List<EntityRecognition> entityListMessage = new List<EntityRecognition>();
             List<ChatEntity> entityListDb = db.ChatEntity.Where(x => x.ChatIntentId == Node).ToList();
+            if (entityListDb.Where(x => x.EntityType.Contains("PERSON")).Any() || entityListDb.Where(x => x.EntityType.Contains("LOCATION")).Any())
+            {
+                entityListMessage = nlp.ExtractionChannel(Message);
+            }
             HttpContext httpContext = HttpContext.Current;
 
             foreach(ChatSessionEntity entityRecognized in entityListRecognized)
             {
-                if (entityRecognized.EntityType == "unrecog")
+                if (entityRecognized.NotRecognized)
                 {
                     if (entityRecognized.EntityName.ToUpper().Contains("PERSON"))
                     {
@@ -216,6 +229,7 @@ namespace ChaT.ai.bLogic
                         {
                             entityRecognized.EntityValue = entityListMessage.Where(x => x.EntityType == "PERSON").Select(Y => Y.EntityValue).FirstOrDefault();
                             entityRecognized.EntityType = "PERSON";
+                            entityRecognized.NotRecognized = false;
                             if (entityRecognized.EntityName.ToUpper().Contains("USERNAME"))
                             {
                                 httpContext.Session["authUser"] = entityRecognized.EntityValue;
@@ -231,6 +245,7 @@ namespace ChaT.ai.bLogic
                         {
                             entityRecognized.EntityValue = entityListMessage.Where(x => x.EntityType == "LOCATION").Select(Y => Y.EntityValue).FirstOrDefault();
                             entityRecognized.EntityType = "LOCATION";
+                            entityRecognized.NotRecognized = false;
                         }
                     }
                     else if (entityRecognized.EntityName.ToUpper().Contains("NUMBER"))
@@ -240,6 +255,7 @@ namespace ChaT.ai.bLogic
                         {
                             entityRecognized.EntityValue = numericValue;
                             entityRecognized.EntityType = "NUMBER";
+                            entityRecognized.NotRecognized = false;
                         }
                     }
                 }
@@ -253,7 +269,8 @@ namespace ChaT.ai.bLogic
                 sessionEntity.EntityType = recognized.EntityType;
                 sessionEntity.EntityName = recognized.EntityName;
                 sessionEntity.EntityValue = recognized.EntityValue;
-                if (recognized.EntityType == "unrecog")
+                sessionEntity.NotRecognized = recognized.NotRecognized;
+                if (recognized.NotRecognized)
                 {
                     noEntityMessage = noEntityMessage + recognized.EntityValue + " ";
                 }
@@ -277,10 +294,10 @@ namespace ChaT.ai.bLogic
 
         public KeyValuePair<int, string> CheckIfAtleastOneEntitywithPasscode(List<ChatSessionEntity> entityListRecognized)
         {
-            ChatEntity entity = db.ChatEntity.Where(x => x.ChatIntentId == Node && x.EntityName.Contains("PASSCODE")).FirstOrDefault();
+            ChatEntity entity = db.ChatEntity.Where(x => x.ChatIntentId == Node && x.EntityType.Contains("PASSCODE")).FirstOrDefault();
             HttpContext httpContext = HttpContext.Current;
 
-            ChatSessionEntity entityRecognized = entityListRecognized.Where(x => x.EntityName.Contains("PASSCODE")).FirstOrDefault();
+            ChatSessionEntity entityRecognized = entityListRecognized.Where(x => x.EntityType.Contains("PASSCODE")).FirstOrDefault();
             if (Message.ToLower()=="apollo")
             {
                 ChatIntent passwordIntent = db.ChatIntent.Where(x => x.ChatIntentId == Node).FirstOrDefault();
@@ -292,6 +309,7 @@ namespace ChaT.ai.bLogic
                 chatSession.isAuth = true;
                 ChatSessionEntity chatSessionEntity = db.ChatSessionEntity.Where(x => x.SessionEntId == entityRecognized.SessionEntId).FirstOrDefault();
                 chatSessionEntity.EntityType = "recog";
+                chatSessionEntity.NotRecognized = false;
                 db.SaveChanges();
                 int authIntentId = (chatSession.IntentBeforeAuth != null) ? chatSession.IntentBeforeAuth.Value : 0;
                 if (authIntentId != 0)

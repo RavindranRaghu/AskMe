@@ -20,6 +20,6 @@ namespace ChaT.db
 
         public string EntityValue { get; set; }
 
-
+        public bool NotRecognized { get; set; }
     }
 }

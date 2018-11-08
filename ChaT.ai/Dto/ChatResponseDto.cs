@@ -65,7 +65,7 @@ namespace ChaT.ai.Dto
 
             // Has Atleast Unrecognized Entity 
 
-            var hasUnrecognizedEntity = db.ChatSessionEntity.Where(x => x.SessionId == sessionId && x.EntityType == "unrecog").ToList();
+            var hasUnrecognizedEntity = db.ChatSessionEntity.Where(x => x.SessionId == sessionId && x.NotRecognized).ToList();
 
             if (hasEntity.Count > 0 && hasUnrecognizedEntity.Count > 0)
             {
@@ -73,7 +73,7 @@ namespace ChaT.ai.Dto
 
                 AskMeEntityExtraction entityMatch = new AskMeEntityExtraction(message, node, sessionId);
                 KeyValuePair<int, string> oneEntityResponse = new KeyValuePair<int, string>();
-                if (entityRecognized.Where(x => x.EntityName.Contains("PASSCODE")).Any())
+                if (entityRecognized.Where(x => x.EntityType.Contains("PASSCODE")).Any())
                 {
                     oneEntityResponse = entityMatch.CheckIfAtleastOneEntitywithPasscode(entityRecognized);
                 }
@@ -116,16 +116,17 @@ namespace ChaT.ai.Dto
                     {
                         ChatSessionEntity recognized = new ChatSessionEntity();
                         recognized.SessionId = sessionId;
-                        recognized.EntityType = "unrecog";
+                        recognized.EntityType = entity.EntityType;
                         recognized.EntityName = entity.EntityName;
                         recognized.EntityValue = entity.EntityDescription;
+                        recognized.NotRecognized = true;
                         entityRecognized.Add(recognized);
                         db.ChatSessionEntity.Add(recognized);
                     }
                     db.SaveChanges();
                     AskMeEntityExtraction entityMatch = new AskMeEntityExtraction(message, childIntent.ChatIntentId, sessionId);
                     KeyValuePair<int, string> oneEntityResponse = new KeyValuePair<int, string>();
-                    if (entityRecognized.Where(x => x.EntityName.Contains("PASSCODE")).Any())
+                    if (entityRecognized.Where(x => x.EntityType.Contains("PASSCODE")).Any())
                     {
                         oneEntityResponse = entityMatch.CheckIfAtleastOneEntitywithPasscode(entityRecognized);
                     }

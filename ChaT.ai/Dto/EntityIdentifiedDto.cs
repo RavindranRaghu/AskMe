@@ -18,5 +18,6 @@ namespace ChaT.ai.Dto
         public string EntityType { get; set; }
         public string EntityName { get; set; }
         public string EntityValue { get; set; }
+        public bool NotRecognized { get; set; }
     }
 }
