@@ -14,7 +14,7 @@ namespace ChaT.ai.bLogic
         private string Message = string.Empty;
         private int Node = 0;
         private ChatDatabaseModel db;
-        private AskMeContentManager contentManager = new AskMeContentManager();        
+        private AskMeContentManager contentManager = new AskMeContentManager();
         public AskMezPossibleMatch(string message, int node)
         {
             this.Message = message.ToLower();
@@ -22,17 +22,17 @@ namespace ChaT.ai.bLogic
             db = new ChatDatabaseModel();
         }
 
-        public KeyValuePair<string, bool> ProbableMatchCorrectSpelling (List<string> vocabList)
+        public KeyValuePair<string, bool> ProbableMatchCorrectSpelling (List<string> vocabList, List<ChatIntent> intentList)
         {
             bool hasMatch = false;
-            List<ChatIntent> intentList =  db.ChatIntent.ToList();
             string responseMessage = contentManager.IntentPossibleMatchedResponse;
             int counter = 0;
             foreach (string vocab in vocabList)
             {                
                 foreach (var intent in intentList)
                 {
-                    if(intent.IntentDescription.ToLower().Contains(vocab.ToLower()) && counter <= 3)
+                    bool IsRedirect = CheckIfRedirect(intent, intentList);
+                    if (!IsRedirect && intent.IntentDescription.ToLower().Contains(vocab.ToLower()) && counter <= 3)
                     {
                         responseMessage = responseMessage + "<br>";
                         responseMessage = responseMessage + intent.IntentDescription;
@@ -40,6 +40,7 @@ namespace ChaT.ai.bLogic
                     }
                 }
             }
+            responseMessage = responseMessage + "<br>" + contentManager.IntentSuggestionResponse;
 
             if (counter > 0)
                 return new KeyValuePair<string, bool>(responseMessage, true);            
@@ -47,10 +48,9 @@ namespace ChaT.ai.bLogic
             return new KeyValuePair<string, bool>(responseMessage, hasMatch);
         }
 
-        public KeyValuePair<string, bool> ProbableMatchTypoError (List<string> vocabList)
+        public KeyValuePair<string, bool> ProbableMatchTypoError (List<string> vocabList, List<ChatIntent> intentList)
         {
             bool hasMatch = false;
-            List<ChatIntent> intentList = db.ChatIntent.ToList();
             string responseMessage = contentManager.IntentPossibleMatchedResponse;
             int counter = 0;
 
@@ -60,17 +60,20 @@ namespace ChaT.ai.bLogic
             foreach (string vocab in vocabList)
             {
 
-                foreach (string intentDesc in intentList.Select(x => x.IntentDescription).ToList())
+                foreach (ChatIntent intent in intentList)
                 {
-                    List<string> intentvocabList = getVocab.GetVocabulary(intentDesc);
-                    foreach (string intent in intentvocabList)
-                    {
-                        if (dist.Compute(vocab, intent.ToLower()) < 2 && counter <= 3)
+                    bool IsRedirect = CheckIfRedirect(intent, intentList);
+                    if (IsRedirect)
+                        continue;
+                    List<string> intentvocabList = getVocab.GetVocabulary(intent.IntentDescription);
+                    foreach (string intentVocab in intentvocabList)
+                    {                        
+                        if (dist.Compute(vocab, intentVocab.ToLower()) < 2 && counter <= 3)
                         {
-                            if (!responseList.Where(x => x.ToString() == intentDesc).Any())
+                            if (!responseList.Where(x => x.ToString() == intent.IntentDescription).Any())
                             {
                                 counter = counter + 1;
-                                responseList.Add(intentDesc);
+                                responseList.Add(intent.IntentDescription);
                             }
                         }
                     }
@@ -89,6 +92,19 @@ namespace ChaT.ai.bLogic
                 return new KeyValuePair<string, bool>(responseMessage, true);
 
             return new KeyValuePair<string, bool>(responseMessage, hasMatch);
+        }
+
+        public bool CheckIfRedirect (ChatIntent intent, List<ChatIntent> intentList)
+        {
+            if (intent.IsRedirect)
+                return true;
+            ChatIntent parent = intentList.Where(x => x.ChatIntentId == intent.ParentId).FirstOrDefault();
+            if (parent.IsRedirect)
+                return true;
+            if (parent.ChatIntentId == 0)
+                return false;
+
+            return CheckIfRedirect(parent, intentList);
         }
 
     }

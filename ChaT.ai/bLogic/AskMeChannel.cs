@@ -20,7 +20,7 @@ namespace ChaT.ai.bLogic
         private AskMezPossibleMatch zPossibleMatch;
         private AskMeSynonymMatch synonymMatch;
         private AskMeContentManager contentManager = new AskMeContentManager();
-        ChatIntent finalResponse = new ChatIntent();
+        ChatIntent finalResponse = new ChatIntent();        
         public AskMeChannel(string message, int node, int sessionId)
         {
             this.Message = message.ToLower();
@@ -47,12 +47,10 @@ namespace ChaT.ai.bLogic
                     finalResponse = ChatInitializer();
                 }
             }
-
             if (finalResponse.Response == contentManager.NoIntentMatchedResponse)
             {
                 common.LogFailureResponse();
             }
-
             return finalResponse;
         }
 
@@ -62,7 +60,9 @@ namespace ChaT.ai.bLogic
             string responseMessage = contentManager.NoIntentMatchedResponse;
             TFIDF getVocab = new TFIDF();
             Dictionary<string, string> reponseDict = new Dictionary<string, string>();
-            ChatIntent responseIntent = db.ChatIntent.Where(x => x.ChatIntentId == 0).FirstOrDefault();
+            List<ChatIntent> intentListAll = db.ChatIntent.ToList();
+
+            ChatIntent responseIntent = intentListAll.Where(x => x.ChatIntentId == 0).FirstOrDefault();
 
             #region 1.CheckIntentGreetingOrGoodbye
             if (hiBye.Greet())                
@@ -71,7 +71,7 @@ namespace ChaT.ai.bLogic
                 return UpdateIntent(Node, contentManager.GoodbyeResponse, responseIntent);        
             #endregion
 
-            List<ChatIntent> intentList = (from intention in db.ChatIntent
+            List<ChatIntent> intentList = (from intention in intentListAll
                                            where intention.ChatIntentId > 2 && intention.ParentId == Node
                                            select intention).ToList();
 
@@ -140,7 +140,7 @@ namespace ChaT.ai.bLogic
             if (scoreDict.Where(x => x.Value > 0.45).Any())
             {
                 int maxScoreChatIntentId = scoreDict.OrderByDescending(x => x.Value).Select(y => y.Key).FirstOrDefault();
-                ChatIntent maxIntent = db.ChatIntent.Where(x => x.ChatIntentId == maxScoreChatIntentId).FirstOrDefault();
+                ChatIntent maxIntent = intentListAll.Where(x => x.ChatIntentId == maxScoreChatIntentId).FirstOrDefault();
                 Node = maxScoreChatIntentId;
 
                 var hasEntity = (from ent in db.ChatEntity
@@ -162,16 +162,16 @@ namespace ChaT.ai.bLogic
                 foreach (int match in possibeMatch)
                 {
                     responseMessage = responseMessage + ", ";
-                    string suggestion = db.ChatIntent.Where(x => x.ChatIntentId == match).Select(y => y.IntentDescription).FirstOrDefault();
+                    string suggestion = intentListAll.Where(x => x.ChatIntentId == match).Select(y => y.IntentDescription).FirstOrDefault();
                     responseMessage = responseMessage + suggestion;
                 }
-                responseMessage = responseMessage + ", " + contentManager.IntentSuggestionResponse;                
+                responseMessage = responseMessage + ", " + contentManager.IntentSuggestionResponse;
                 return UpdateIntent(Node, responseMessage, responseIntent);
             }
             #endregion
 
             #region 4.Probable Match Process
-            KeyValuePair<string, bool> probableMatchCorrect = zPossibleMatch.ProbableMatchCorrectSpelling(vocabList);
+            KeyValuePair<string, bool> probableMatchCorrect = zPossibleMatch.ProbableMatchCorrectSpelling(vocabList, intentListAll);
             if (probableMatchCorrect.Value)
             {
                 common.LogFailureResponse();
@@ -179,7 +179,7 @@ namespace ChaT.ai.bLogic
                 return UpdateIntent(Node, responseMessage, responseIntent);
             }
 
-            KeyValuePair<string, bool> probableMatchTypo = zPossibleMatch.ProbableMatchTypoError(vocabList);
+            KeyValuePair<string, bool> probableMatchTypo = zPossibleMatch.ProbableMatchTypoError(vocabList, intentListAll);
             if (probableMatchTypo.Value)
             {
                 common.LogFailureResponse();
@@ -189,7 +189,7 @@ namespace ChaT.ai.bLogic
             #endregion
 
             #region 4.Synonym Match Process
-            KeyValuePair<string, bool> synMatch = synonymMatch.SynonymMatch(vocabList);
+            KeyValuePair<string, bool> synMatch = synonymMatch.SynonymMatch(vocabList, intentListAll);
             if (synMatch.Value)
             {
                 common.LogFailureResponse();
@@ -204,48 +204,6 @@ namespace ChaT.ai.bLogic
             return responseIntent;
         }
 
-
-        private KeyValuePair<int, string> GetEntityforIntent(int chatIntentId, string response)
-        {
-            string entity = string.Empty;
-            List<ChatEntity> entityList = new List<ChatEntity>(); // db.ChatEntity.Where(z => z.ChatIntentId == chatIntentId.ToString()).ToList();
-            List<string> questionList = db.ChatIntentQuestion.Where(x=>x.ChatIntentId == chatIntentId && x.QuestionDesc.ToLower().Contains("entity") ).Select(y=>y.QuestionDesc).ToList();
-            TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
-            KeyValuePair<int, string> responseIntent = new KeyValuePair<int, string>();
-            foreach (string question in questionList)
-            {
-                string extractedEntityName = string.Empty;
-                string extractedEntityValue = string.Empty;
-                string textPriortoEntityinQuestion = string.Empty;
-                string textPriortoEntityinMessage = string.Empty;
-                int iStart = question.IndexOf("[");
-                int iEnd = question.IndexOf("]");
-                if (iStart != -1 && iEnd != -1)
-                {
-                    extractedEntityName = question.Substring(iStart + 1, iEnd - iStart - 1);
-                    textPriortoEntityinQuestion = question.Substring(0, iStart);
-                    textPriortoEntityinMessage = Message.Substring(0, iStart);
-                    LevenshteinDistance dist = new LevenshteinDistance();
-                    int matching = dist.Compute(textPriortoEntityinQuestion.ToLower(), textPriortoEntityinMessage.ToLower());
-                    if (matching <= 6)
-                    {
-                        int iStartSpace = textPriortoEntityinMessage.LastIndexOf(" ");
-                        int iEndSpace = Message.IndexOf(",", textPriortoEntityinMessage.Length);
-                        if (iEndSpace == -1)
-                            iEndSpace = Message.Length;
-                        extractedEntityValue = Message.Substring(iStartSpace, iEndSpace-iStartSpace);
-                        extractedEntityValue = textInfo.ToTitleCase(extractedEntityValue);
-                        response = response.Replace(extractedEntityName, extractedEntityValue);
-                        //AskMeOnlineApi online = new AskMeOnlineApi(extractedEntityValue, chatIntentId);
-                        //responseIntent = online.OnlineApiChannel();
-                        break;
-                    }
-
-                }
-            }
-
-            return responseIntent;
-        }
 
         private ChatIntent UpdateIntent (int node, string message, ChatIntent respondIntent)
         {

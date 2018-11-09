@@ -23,7 +23,7 @@ namespace ChaT.ai.bLogic
 
         public string IntentPossibleMatchedResponse
         {
-            get { return "Sorry, not sure I understand, Did You Mean"; }
+            get { return "Sorry, not sure I understand, Did You mean"; }
         }
 
 

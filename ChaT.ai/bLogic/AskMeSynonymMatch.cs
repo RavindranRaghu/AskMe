@@ -24,12 +24,12 @@ namespace ChaT.ai.bLogic
             db = new ChatDatabaseModel();
         }
 
-        public KeyValuePair<string, bool> SynonymMatch (List<string> vocabList)
+        public KeyValuePair<string, bool> SynonymMatch (List<string> vocabList, List<ChatIntent> intentList)
         {
-            bool hasMatch = false;
-            List<ChatIntent> intentList = db.ChatIntent.ToList();
+            bool hasMatch = false;            
             string responseMessage = contentManager.IntentPossibleMatchedResponse;
             int counter = 0;
+            AskMezPossibleMatch possibleMatch = new AskMezPossibleMatch(Message, Node);
 
             LevenshteinDistance dist = new LevenshteinDistance();
             TFIDF getVocab = new TFIDF();
@@ -64,8 +64,11 @@ namespace ChaT.ai.bLogic
 
 
 
-                foreach (string intentDesc in intentList.Select(x => x.IntentDescription).ToList())
+                foreach (ChatIntent intent in intentList)
                 {
+                    if (possibleMatch.CheckIfRedirect(intent, intentList))
+                        continue;
+                    string intentDesc = intent.IntentDescription;
                     List<string> intentvocabList = getVocab.GetVocabulary(intentDesc);
 
                     bool hasSynonm = synonymList.Intersect(intentvocabList).Any();

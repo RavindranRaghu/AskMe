@@ -305,5 +305,48 @@ namespace ChaT.ai.bLogic
         //    return Json(result, JsonRequestBehavior.AllowGet);
         //}
 
+
+        //private KeyValuePair<int, string> GetEntityforIntent(int chatIntentId, string response)
+        //{
+        //    string entity = string.Empty;
+        //    List<ChatEntity> entityList = new List<ChatEntity>(); // db.ChatEntity.Where(z => z.ChatIntentId == chatIntentId.ToString()).ToList();
+        //    List<string> questionList = db.ChatIntentQuestion.Where(x => x.ChatIntentId == chatIntentId && x.QuestionDesc.ToLower().Contains("entity")).Select(y => y.QuestionDesc).ToList();
+        //    TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
+        //    KeyValuePair<int, string> responseIntent = new KeyValuePair<int, string>();
+        //    foreach (string question in questionList)
+        //    {
+        //        string extractedEntityName = string.Empty;
+        //        string extractedEntityValue = string.Empty;
+        //        string textPriortoEntityinQuestion = string.Empty;
+        //        string textPriortoEntityinMessage = string.Empty;
+        //        int iStart = question.IndexOf("[");
+        //        int iEnd = question.IndexOf("]");
+        //        if (iStart != -1 && iEnd != -1)
+        //        {
+        //            extractedEntityName = question.Substring(iStart + 1, iEnd - iStart - 1);
+        //            textPriortoEntityinQuestion = question.Substring(0, iStart);
+        //            textPriortoEntityinMessage = Message.Substring(0, iStart);
+        //            LevenshteinDistance dist = new LevenshteinDistance();
+        //            int matching = dist.Compute(textPriortoEntityinQuestion.ToLower(), textPriortoEntityinMessage.ToLower());
+        //            if (matching <= 6)
+        //            {
+        //                int iStartSpace = textPriortoEntityinMessage.LastIndexOf(" ");
+        //                int iEndSpace = Message.IndexOf(",", textPriortoEntityinMessage.Length);
+        //                if (iEndSpace == -1)
+        //                    iEndSpace = Message.Length;
+        //                extractedEntityValue = Message.Substring(iStartSpace, iEndSpace - iStartSpace);
+        //                extractedEntityValue = textInfo.ToTitleCase(extractedEntityValue);
+        //                response = response.Replace(extractedEntityName, extractedEntityValue);
+        //                //AskMeOnlineApi online = new AskMeOnlineApi(extractedEntityValue, chatIntentId);
+        //                //responseIntent = online.OnlineApiChannel();
+        //                break;
+        //            }
+
+        //        }
+        //    }
+
+        //    return responseIntent;
+        //}
+
     }
 }
