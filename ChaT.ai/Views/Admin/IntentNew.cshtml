@@ -175,6 +175,7 @@
     }
 
     function treeRecursion(tree) {
+        console.log(tree);
         counter = counter + 20;
         treeHtml = treeHtml + '<ul style="list-style-image: url(../content/img/folder.png);">';
         tree.forEach(function (item) {
@@ -196,9 +197,9 @@
             treeHtml += '<a href="#" style="text-decoration:underline" class="viewProject" ' + dataHtml + '><span class="intent-name">' + item.IntentName + '</span></a>';
 
             dataHtml += 'data-toggle="modal" data-target="#projectModal"';
-            treeHtml += '<a href = "#" class="newProject" ' + dataHtml + ' > <span class="glypicon glyphicon-plus">Child</span></a >';
-            treeHtml += '<a href = "#" class="openExistingProject" ' + dataHtml + '> <span class="glypicon glyphicon-edit">Update</span></a >';
-            treeHtml += '<a href = "#" class="deleteExistingProject" ' + dataHtml + '> <span class="glypicon glyphicon-trash">Delete</span></a >';
+            treeHtml += '<a href = "#" class="newProject" style="color:grey;"' + dataHtml + ' > Add Child <span class="glypicon glyphicon-plus" style="color:green;font-size:x-large;font-weight:bold;"></span></a >';
+            //treeHtml += '<a href = "#" class="openExistingProject" ' + dataHtml + '> <span class="glypicon glyphicon-edit">Update</span></a >';
+            treeHtml += '<a href = "#" class="deleteExistingProject" style="color:grey;" ' + dataHtml + '> Delete Node <span class="glyphicon glyphicon-remove-sign" style="color:crimson"></span></a >';
             treeHtml += '</li>';
             if (item.Children.length > 0) {
                 treeRecursion(item.Children);
@@ -213,8 +214,23 @@
 
         //view Details 
         $(document).on('click', '.viewProject', function () {
+
+            var dataHtml = '';
+            dataHtml += 'data-parentid="' + $(this).data('parentid') + '"';
+            dataHtml += 'data-parentname="' + $(this).data('parentname') + '"';
+            dataHtml += 'data-response="' + $(this).data('response') + '"';
+            dataHtml += 'data-intentid="' + $(this).data('intentid') + '"';
+            dataHtml += 'data-intentname="' + $(this).data('intentname')+ '"';
+            dataHtml += 'data-intentdesc="' + $(this).data('intentdesc') + '"';
+            dataHtml += 'data-needauth="' + $(this).data('needauth') + '"';
+            dataHtml += 'data-isredirect="' + $(this).data('isredirect') + '"';
+            dataHtml += 'data-redirectintent="' + $(this).data('redirectintent') + '"';
+            dataHtml += 'data-redirectintentname="' + $(this).data('redirectintentname') + '"';
+            dataHtml += 'data-lastupdated="' + $(this).data('lastupdated') + '"';
+            dataHtml += 'data-toggle="modal" data-target="#projectModal"';
                         
             var viewHtml = '<div class="viewBody">';
+            viewHtml += '<a href = "#" class="openExistingProject" ' + dataHtml + '> <span style="float:right;font-size:x-large;">Update</span></a >';
             viewHtml += '<div class="viewRow"><span class="viewLabel">Intent Id: </span><span class="viewText">' + $(this).data('intentid') + '</span></div>';
             viewHtml += '<div class="viewRow"><span class="viewLabel">Intent Name: </span><span class="viewText">' + $(this).data('intentname') + '</span></div>';            
             viewHtml += '<div class="viewRow"><span class="viewLabel">Intent Desc: </span><span class="viewText">' + $(this).data('intentdesc') + '</span></div>';
@@ -231,6 +247,10 @@
         //open Modal for existing project
 
         $(document).on('click', '.openExistingProject', function () {
+
+            var milli = $(this).data('lastupdated').replace(/\/Date\((-?\d+)\)\//, '$1');
+            var d = new Date(parseInt(milli));
+
             $('#saveProject').html('Update');
             $('#saveProject').removeAttr('disabled');
             $('#questionId').val($(this).data('id'));
@@ -245,13 +265,18 @@
             console.log($(this).data('parentname'));
             $('#parent').val($(this).data('parentid'));
             $('#parent-id').val($(this).data('parentid'));
-            $('#lastUpdated').html('Last Updated: ' + $(this).data('lastupdated'));
+            $('#lastUpdated').html('Last Updated: ' + d.toLocaleDateString());
             $('#operation').val("u");
+
         });
 
         //open Modal for delete
 
         $(document).on('click', '.deleteExistingProject', function () {
+
+            var milli = $(this).data('lastupdated').replace(/\/Date\((-?\d+)\)\//, '$1');
+            var d = new Date(parseInt(milli));
+            
             $('#saveProject').html('Delete');
             $('#saveProject').removeAttr('disabled');
             $('#questionId').val($(this).data('id'));
@@ -266,7 +291,7 @@
             $('#parent option:selected').text($(this).data('parentname'));
             $('#parent').val($(this).data('parentid'));
             $('#parent-id').val($(this).data('parentid'));
-            $('#lastUpdated').html('Last Updated: ' + $(this).data('lastupdated'));
+            $('#lastUpdated').html('Last Updated: ' + d.toLocaleDateString());
             $('#operation').val("d");
         });
 

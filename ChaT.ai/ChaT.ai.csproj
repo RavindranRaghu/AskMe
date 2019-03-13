@@ -216,8 +216,8 @@
     <Content Include="Content\img\1.png" />
     <Content Include="Content\img\folder.png" />
     <Content Include="Content\img\folder32.png" />
-    <Content Include="Content\img\Jarvis.png" />
     <Content Include="Content\img\JarvisNew.png" />
+    <Content Include="Content\img\JarvisNew1.png" />
     <Content Include="Content\img\loadchat.gif" />
     <Content Include="Content\img\loader.gif" />
     <Content Include="Content\img\logo.png" />

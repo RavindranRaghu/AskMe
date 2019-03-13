@@ -198,17 +198,34 @@ namespace ChaT.ai.bLogic
             }
             #endregion
 
-
-            responseIntent.Response = responseMessage;
-            responseIntent.ChatIntentId = Node;
+            if (responseIntent != null)
+            {
+                responseIntent.ChatIntentId = Node;
+                responseIntent.Response = responseMessage;
+            }
+            else
+            {
+                responseIntent = new ChatIntent();
+                responseIntent.ChatIntentId = Node;
+                responseIntent.Response = "Sorry I did not understand, Please enter one of the suggestions";
+            }
             return responseIntent;
         }
 
 
         private ChatIntent UpdateIntent (int node, string message, ChatIntent respondIntent)
         {
-            respondIntent.ChatIntentId = node;
-            respondIntent.Response = message;
+            if (respondIntent != null)
+            {
+                respondIntent.ChatIntentId = node;
+                respondIntent.Response = message;
+            }
+            else
+            {
+                respondIntent = new ChatIntent();
+                respondIntent.ChatIntentId = node;
+                respondIntent.Response = "Sorry I did not understand, Please enter one of the suggestions";
+            }
             return respondIntent;
         }
     }

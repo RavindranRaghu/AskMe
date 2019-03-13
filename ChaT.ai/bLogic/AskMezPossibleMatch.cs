@@ -99,12 +99,15 @@ namespace ChaT.ai.bLogic
             if (intent.IsRedirect)
                 return true;
             ChatIntent parent = intentList.Where(x => x.ChatIntentId == intent.ParentId).FirstOrDefault();
-            if (parent.IsRedirect)
-                return true;
-            if (parent.ChatIntentId == 0)
-                return false;
+            if (parent != null)
+            {
+                if (parent.IsRedirect)
+                    return true;
 
-            return CheckIfRedirect(parent, intentList);
+                if (parent.ChatIntentId == 0)
+                    return false;
+            }
+            return false; // CheckIfRedirect(parent, intentList);
         }
 
     }
